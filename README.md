@@ -168,11 +168,54 @@ refactor-architect (패턴 탐지 → plan.md) → 사용자 승인
 
 ## 지식 시스템 (Knowledge System)
 
-프로젝트 지식은 `knowledge/index.md`에 마크다운으로 저장되고 세션 간에 유지됩니다.
+두 계층으로 분리되어 있습니다.
 
-- **자동 로드**: 세션 시작 시 `session-start` 훅이 `knowledge/index.md`를 컨텍스트에 주입합니다.
-- **수동 저장**: 작업 완료 후 `/save-knowledge`로 학습 내용을 저장합니다.
-- **300줄 규칙**: `index.md`가 300줄을 초과하면 도메인 서브파일로 분리하고 링크로 대체합니다.
+### 1. 전역 Wisdom Hub — `~/.front-agent/wisdom/`
+
+모든 프로젝트가 공유하는 허브. 설치 시 자동 생성됩니다.
+
+```
+~/.front-agent/wisdom/
+├── summary.md      ← 세션 시작 시 자동 로드 (20줄 고정)
+├── learnings.md    ← 작업에서 얻은 교훈 (온디맨드)
+├── decisions.md    ← 설계/아키텍처 결정 사항 (온디맨드)
+└── issues.md       ← 알려진 문제, 주의사항 (온디맨드)
+```
+
+**핵심 설계: summary.md만 자동 로드**
+
+매 세션 시작 시 `summary.md`(최대 20줄)만 컨텍스트에 주입하고, `learnings/decisions/issues.md`는 필요할 때만 로드합니다. 지식이 쌓여도 토큰 소비가 늘어나지 않습니다.
+
+```
+세션 시작
+  → summary.md (20줄 고정)    ← 항상 로드
+  → knowledge/index.md        ← 프로젝트 컨텍스트
+
+작업 중 필요 시
+  → learnings.md / decisions.md / issues.md  ← 온디맨드
+```
+
+**장점**
+- 프로젝트 A에서 배운 것이 프로젝트 B에서도 자동 참조됨
+- summary.md 20줄 고정으로 토큰 소비 일정하게 유지
+- 시간이 지날수록 에이전트가 팀 맥락을 더 잘 이해함
+
+**단점**
+- summary.md가 20줄 제한이라 모든 지식을 담지 못함 (의도적 트레이드오프)
+- 상세 wisdom은 직접 `/search-knowledge`로 조회해야 함
+
+### 2. 프로젝트 Knowledge — `knowledge/`
+
+현재 프로젝트 전용. Git에 포함되어 팀원과 공유 가능.
+
+```
+knowledge/
+└── index.md    ← 컴포넌트, 패턴, 디자인 규칙 (300줄 제한)
+```
+
+- **자동 로드**: 세션 시작 시 `session-start` 훅이 자동 주입
+- **수동 저장**: `/save-knowledge`로 학습 내용 저장
+- **300줄 규칙**: 초과 시 도메인 서브파일로 분리
 
 ---
 
@@ -212,10 +255,10 @@ refactor-architect (패턴 탐지 → plan.md) → 사용자 승인
 
 ---
 
-## 로드맵 (Roadmap)
+## 고도화 방향
 
-- [ ] **Obsidian 연동** — vault 기반 세션 간 지식 지속성, 프로젝트 간 컨텍스트 공유
-- [ ] **Wisdom 시스템** — `learnings.md`, `decisions.md`, `issues.md` 세션 시작 시 자동 로드
+- [x] **Wisdom Hub** — `~/.front-agent/wisdom/` 전역 지식 허브, summary 20줄 고정으로 토큰 최소화
+- [ ] **Obsidian 연동** — Wisdom Hub를 Obsidian vault로 교체, 그래프 뷰·wikilink 추적성 확보
 - [ ] **Codex CLI 통합** — 독립 adversarial 코드 리뷰로 self-review 편향 제거
 - [ ] **Lighthouse CI 연동** — 성능 지표 자동 검사
 
