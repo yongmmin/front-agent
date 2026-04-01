@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Claude plans (session-specific)
+PLAN.md
+plan.md
+
+# Knowledge base - index is committed, but per-project content should be local
+# Uncomment below if you don't want to share knowledge across forks:
+# knowledge/components.md
+# knowledge/features/
+# knowledge/issues/

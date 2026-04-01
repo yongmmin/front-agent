@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "name": "fe-copilot",
+      "description": "Frontend Co-Pilot: React/Next.js 프론트엔드 개발 자동화 플러그인",
+      "path": "/Users/iyongmin/Documents/side_projects/front-end"
+    }
+  ]
+}

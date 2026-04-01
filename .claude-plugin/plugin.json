@@ -1,0 +1,11 @@
+{
+  "name": "fe-copilot",
+  "description": "Frontend Co-Pilot: React/Next.js 프론트엔드 개발 자동화 플러그인. Figma 구현, 기능 개발, 리팩토링을 오케스트레이션으로 처리.",
+  "version": "0.1.0",
+  "author": "iyongmin",
+  "license": "MIT",
+  "skills": "skills/",
+  "agents": "agents/",
+  "hooks": "hooks/hooks.json",
+  "knowledge": "knowledge/index.md"
+}

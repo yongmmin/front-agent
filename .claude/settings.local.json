@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(chmod:*)",
+      "Read(//Users/iyongmin/.claude/**)",
+      "Bash(PLUGIN_DIR=\"/Users/iyongmin/Documents/side_projects/front-end\")",
+      "Bash(__NEW_LINE_dbdb84e1fd9c512e__ for:*)",
+      "Bash(do)",
+      "Bash(ln -sf \"$PLUGIN_DIR/skills/$skill\" ~/.claude/skills/$skill)",
+      "Bash(echo \"✓ ~/.claude/skills/$skill\")",
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
