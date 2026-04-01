@@ -1,75 +1,83 @@
 ---
 name: save-knowledge
-description: Save learnings, decisions, and component info to the knowledge base
+description: Save learnings, decisions, and component info to the knowledge base and global wisdom hub
 ---
 
 # Skill: save-knowledge
 
 **Trigger**: `/save-knowledge [topic]` or auto-called after task completion
-**Purpose**: Save learnings, decisions, and component info to the knowledge base.
+**Purpose**: 학습 내용을 프로젝트 knowledge/와 전역 wisdom hub(`~/.front-agent/wisdom/`)에 저장한다.
 
 ---
 
-## Activation
+## 저장 위치 결정
 
-- Auto: called by orchestrator after feature/refactor completion
-- Manual: `/save-knowledge [what to save]`
+| 내용 유형 | 저장 위치 |
+|----------|----------|
+| 컴포넌트, 패턴, 디자인 규칙 | `knowledge/` (프로젝트 한정) |
+| 교훈 (learnings) | `~/.front-agent/wisdom/learnings.md` + summary 갱신 |
+| 설계 결정 (decisions) | `~/.front-agent/wisdom/decisions.md` + summary 갱신 |
+| 알려진 이슈 (issues) | `~/.front-agent/wisdom/issues.md` + summary 갱신 |
 
 ---
 
 ## Workflow
 
-1. Determine knowledge type: component / pattern / feature / issue / design-system
-2. Select or create target file
-3. Append entry (never exceed 300 lines per file)
-4. If file would exceed 300 lines → create domain sub-file and link from index.md
-5. Update `knowledge/index.md` if needed
-
----
-
-## Knowledge Types & Target Files
-
-| Type | File |
-|------|------|
-| New component | `knowledge/components.md` |
-| Code pattern | `knowledge/patterns.md` |
-| Design rule | `knowledge/design-system.md` |
-| Feature summary | `knowledge/features/[name].md` |
-| Bug/issue | `knowledge/issues/[name].md` |
+1. 저장할 내용의 유형 판단
+2. 해당 파일에 항목 추가
+3. `~/.front-agent/wisdom/summary.md` 갱신 (20줄 이하 유지)
+   - 초과 시 가장 오래된 항목 1개 삭제 후 추가
 
 ---
 
 ## Entry Format
 
-### Component Entry
-```markdown
-## [ComponentName]
-- **File**: `path/to/Component.tsx`
-- **Props**: [list]
-- **Use when**: [description]
-- **Added**: [date]
+### Learnings
+```
+- [날짜] [프로젝트명] 내용
 ```
 
-### Pattern Entry
+### Decisions
+```
+- [날짜] [프로젝트명] 결정 — 이유
+```
+
+### Issues
+```
+- [날짜] [프로젝트명] 문제 — 해결책 또는 주의사항
+```
+
+### summary.md 갱신 포맷
 ```markdown
-## [Pattern Name]
-**Problem**: [what problem it solves]
-**Solution**: [the pattern]
-**Example**: `path/to/example.tsx`
+# Wisdom Summary
+> 20줄 제한.
+
+## Learnings
+- [최근 3개만 유지]
+
+## Decisions
+- [최근 3개만 유지]
+
+## Issues
+- [최근 3개만 유지]
 ```
 
 ---
 
-## 300-Line Rule
+## 프로젝트 knowledge/ 저장 (컴포넌트/패턴/디자인)
 
-If target file exceeds 300 lines after addition:
-1. Split into `knowledge/[domain]/[subtopic].md`
-2. Replace content in original file with a link: `→ See [subtopic.md](./[domain]/[subtopic].md)`
-3. Update `knowledge/index.md`
+| Type | File |
+|------|------|
+| 컴포넌트 | `knowledge/components.md` |
+| 코드 패턴 | `knowledge/patterns.md` |
+| 디자인 규칙 | `knowledge/design-system.md` |
+
+300줄 초과 시 도메인 서브파일로 분리 후 index.md에서 링크.
 
 ---
 
 ## Constraints
 
-- Never exceed 300 lines in any knowledge file
-- Always update index.md when creating new domain files
+- summary.md는 절대 20줄을 초과하지 않는다
+- learnings/decisions/issues.md는 300줄 제한
+- 프로젝트명을 항상 항목에 포함해 어느 프로젝트 맥락인지 추적 가능하게 한다
