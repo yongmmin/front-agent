@@ -2,9 +2,9 @@
 
 # Frontend Co-Pilot
 
-**Claude Code 플러그인 — 10개 에이전트, 18개 온디맨드 스킬, Plan-First 워크플로우**
+**Claude Code 플러그인 — 7개 에이전트, 18개 온디맨드 스킬, Plan-First 워크플로우**
 
-[![Agents](https://img.shields.io/badge/agents-10-green.svg)](#에이전트-agents)
+[![Agents](https://img.shields.io/badge/agents-7-green.svg)](#에이전트-agents)
 [![Skills](https://img.shields.io/badge/skills-18-orange.svg)](#내부-에이전트-도구)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Stack](https://img.shields.io/badge/stack-React%20%2F%20Next.js-61DAFB.svg)](#호환-스택)
@@ -96,18 +96,17 @@ done
 
 ## 에이전트 (Agents)
 
-| Agent | Model | Role |
-|-------|-------|------|
-| `orchestrator` | opus | 진입점 — 요청 분석, plan.md 생성, 에이전트 조율 |
-| `component-auditor` | haiku | UI 작업 전 재사용 가능 컴포넌트 탐색 |
-| `test-writer` | sonnet | 테스트 케이스 작성 (TDD RED 단계) |
-| `implementer` | sonnet | 테스트를 통과하는 기능 구현 |
-| `api-integrator` | sonnet | UI-API 연결 + 로딩/에러 상태 처리 |
-| `test-runner` | sonnet | 테스트 실행, 실패 시 GitHub 이슈 생성 |
-| `figma-builder` | sonnet | Figma MCP로 디자인 구현 + 반응형 레이아웃 |
-| `style-matcher` | sonnet | Figma 없이 기존 디자인 언어에 맞춰 UI 구현 |
-| `reviewer` | opus | 코드 품질, TypeScript, 보안 리뷰 |
-| `refactor-architect` | opus | 반복 패턴 탐지, 모듈화 설계안 작성 |
+토큰 사용량 최소화를 위해 유사 역할을 통합했습니다. 에이전트 호출 횟수가 줄면 세션 간 컨텍스트 전달 오버헤드도 줄어듭니다.
+
+| Agent | Model | Role | 통합 내용 |
+|-------|-------|------|----------|
+| `component-auditor` | haiku | UI 작업 전 재사용 가능 컴포넌트 탐색 | — |
+| `developer` | sonnet | 테스트 작성 + 기능 구현 (TDD RED → GREEN) | test-writer + implementer |
+| `ui-builder` | sonnet | Figma 또는 기존 스타일 기반 UI 구현 + 반응형 | figma-builder + style-matcher |
+| `api-integrator` | sonnet | UI-API 연결 + 로딩/에러 상태 처리 | — |
+| `test-runner` | sonnet | 테스트 실행, 실패 시 GitHub 이슈 생성 | — |
+| `reviewer` | opus | 코드 품질, TypeScript, 보안 리뷰 | — |
+| `refactor-architect` | opus | 반복 패턴 탐지, 모듈화 설계안 작성 | — |
 
 ---
 
@@ -138,21 +137,21 @@ done
 ### Figma 구현
 
 ```
-component-auditor → figma-builder → pixel-check → a11y-check → reviewer
+component-auditor → ui-builder (Figma MCP + 반응형) → pixel-check → a11y-check → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### 기능 구현
 
 ```
-component-auditor → test-writer → implementer → api-integrator → test-runner → reviewer
+component-auditor → developer (테스트 + 구현) → api-integrator → test-runner → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### 디자인 없는 UI
 
 ```
-component-auditor → style-matcher → a11y-check → reviewer
+component-auditor → ui-builder (기존 스타일 매칭) → a11y-check → reviewer
 → git-branch → git-commit → git-pr
 ```
 

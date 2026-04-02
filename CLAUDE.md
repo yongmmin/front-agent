@@ -118,18 +118,17 @@ feat/기능명
 
 에이전트는 `Agent` 툴로 호출하며, 해당 에이전트의 `.md` 파일 내용을 프롬프트에 포함한다.
 
-| 에이전트 | 파일 | 모델 |
-|---------|------|------|
-| orchestrator | agents/orchestrator.md | opus |
-| component-auditor | agents/component-auditor.md | haiku |
-| test-writer | agents/test-writer.md | sonnet |
-| implementer | agents/implementer.md | sonnet |
-| api-integrator | agents/api-integrator.md | sonnet |
-| test-runner | agents/test-runner.md | sonnet |
-| figma-builder | agents/figma-builder.md | sonnet |
-| style-matcher | agents/style-matcher.md | sonnet |
-| reviewer | agents/reviewer.md | opus |
-| refactor-architect | agents/refactor-architect.md | opus |
+> 토큰 최소화 원칙: 에이전트 호출 횟수를 줄이기 위해 유사 역할을 통합했다.
+
+| 에이전트 | 파일 | 모델 | 통합 내용 |
+|---------|------|------|----------|
+| component-auditor | agents/component-auditor.md | haiku | — |
+| developer | agents/developer.md | sonnet | test-writer + implementer 통합 |
+| ui-builder | agents/ui-builder.md | sonnet | figma-builder + style-matcher 통합 |
+| api-integrator | agents/api-integrator.md | sonnet | — |
+| test-runner | agents/test-runner.md | sonnet | — |
+| reviewer | agents/reviewer.md | opus | — |
+| refactor-architect | agents/refactor-architect.md | opus | — |
 
 ---
 
@@ -181,21 +180,21 @@ feat/기능명
 
 ### 기능 구현
 ```
-component-auditor → test-writer → implementer
+component-auditor → developer (테스트 + 구현)
 → api-integrator → test-runner → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### Figma 구현
 ```
-component-auditor → figma-builder (Figma MCP + 반응형)
+component-auditor → ui-builder (Figma MCP + 반응형)
 → pixel-check → a11y-check → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### 디자인 없는 UI
 ```
-component-auditor → style-matcher
+component-auditor → ui-builder (기존 스타일 매칭)
 → a11y-check → reviewer
 → git-branch → git-commit → git-pr
 ```
