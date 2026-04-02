@@ -22,7 +22,7 @@
    - Duplicate API patterns → candidate for service abstraction
 3. Produce a refactor plan.md with clear proposals
 4. Request user review
-5. After approval, hand off to implementer
+5. After approval, hand off to developer
 
 ---
 
