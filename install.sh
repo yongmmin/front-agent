@@ -8,6 +8,21 @@ PLUGIN_DIR="$(cd "$(dirname "$0")" && pwd)"
 CLAUDE_DIR="$HOME/.claude"
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 
+link_skill() {
+  local source="$1"
+  local target="$2"
+
+  if [ -L "$target" ] || [ -f "$target" ]; then
+    rm -f "$target"
+  elif [ -d "$target" ]; then
+    echo "  ✗ Refusing to replace directory: $target"
+    echo "    Remove it manually if you want this installer to manage this skill path."
+    return 1
+  fi
+
+  ln -s "$source" "$target"
+}
+
 echo "=== Frontend Co-Pilot — Installation ==="
 echo ""
 
@@ -17,7 +32,7 @@ mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/commands"
 for skill in front-agent implement-figma match-style tdd code-review a11y-check \
   pixel-check refactor-scan component-audit save-knowledge search-knowledge \
   git-branch git-commit git-pr git-issue; do
-  ln -sf "$PLUGIN_DIR/skills/$skill" "$CLAUDE_DIR/skills/$skill"
+  link_skill "$PLUGIN_DIR/skills/$skill" "$CLAUDE_DIR/skills/$skill"
   echo "Use the $skill skill. Arguments: \$ARGUMENTS" > "$CLAUDE_DIR/commands/$skill.md"
   echo "  ✓ $skill"
 done
