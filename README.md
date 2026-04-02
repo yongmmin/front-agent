@@ -228,9 +228,9 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 - [x] Wisdom Hub — 전역 지식 허브, summary 20줄 고정
 - [x] 스킬 최적화 — 14개로 통합, 워크플로우 연결
 - [x] Harness Engineering v4 — PostToolUse, harness_loop, constraints.md 등 6개 구성 요소
+- [x] **도구 경계 하드 강제** — .env* 하드 차단 (settings.json Deny) + config 파일 검토 요청 (PreToolUse 훅) + install.sh 자동 적용
 
 **예정**
-- [ ] **도구 경계 하드 강제** — settings.json Deny 규칙으로 파일시스템 경계 Claude Code 레벨 차단
 - [ ] **Codex adversarial review** — 다른 AI로 독립 검토, self-review 편향 제거
 - [ ] **구조 테스트** — 의존성 규칙을 실제 테스트 코드로 강제
 - [ ] **Obsidian 연동** — Wisdom Hub를 Obsidian vault로 교체
