@@ -106,49 +106,56 @@ plan.md 생성 후:
 
 ## Step 5: 워크플로우별 에이전트 실행
 
+> **CRITICAL**: 오케스트레이터(나)는 절대 직접 코드를 작성하거나 파일을 수정하지 않는다.
+> 모든 구현은 반드시 `Agent` 툴로 서브에이전트를 spawn해서 처리한다.
+> Write/Edit 툴은 오직 plan.md 작성에만 허용된다.
+
+각 에이전트를 호출할 때는 해당 에이전트 파일(`agents/*.md`) 내용을 프롬프트에 포함하고,
+현재까지의 컨텍스트(plan.md 내용, 이전 에이전트 결과)를 함께 전달한다.
+
 ### Figma 구현
 ```
-component-auditor (haiku)
-→ figma-builder (sonnet)
-→ pixel-check (sonnet)
-→ a11y-check (sonnet)
-→ reviewer (opus)
-→ git-branch → git-commit → git-pr
+1. Agent(component-auditor, model=haiku) — 재사용 컴포넌트 탐색
+2. Agent(ui-builder, model=sonnet)       — Figma MCP로 디자인 구현 + 반응형
+3. Agent(ui-builder, model=sonnet)       — pixel-check: 디자인 vs 구현 비교
+4. Agent(ui-builder, model=sonnet)       — a11y-check: 접근성 검사
+5. Agent(reviewer, model=opus)           — 코드 리뷰
+6. Agent(git-branch → git-commit → git-pr)
 ```
 
 ### UI 구현 (Figma 없음)
 ```
-component-auditor (haiku)
-→ style-matcher (sonnet)
-→ a11y-check (sonnet)
-→ reviewer (opus)
-→ git-branch → git-commit → git-pr
+1. Agent(component-auditor, model=haiku) — 재사용 컴포넌트 탐색
+2. Agent(ui-builder, model=sonnet)       — 기존 스타일 매칭 후 구현
+3. Agent(ui-builder, model=sonnet)       — a11y-check: 접근성 검사
+4. Agent(reviewer, model=opus)           — 코드 리뷰
+5. Agent(git-branch → git-commit → git-pr)
 ```
 
 ### 기능 구현
 ```
-component-auditor (haiku)
-→ test-writer (sonnet)
-→ implementer (sonnet)
-→ api-integrator (sonnet) [API 연결 필요 시]
-→ test-runner (sonnet)
-→ reviewer (opus)
-→ git-branch → git-commit → git-pr
+1. Agent(component-auditor, model=haiku)  — 재사용 컴포넌트 탐색
+2. Agent(developer, model=sonnet)         — 테스트 작성 + 기능 구현
+3. Agent(api-integrator, model=sonnet)    — API 연결 (필요 시)
+4. Agent(test-runner, model=sonnet)       — 테스트 실행 및 검증
+5. Agent(reviewer, model=opus)            — 코드 리뷰
+6. Agent(git-branch → git-commit → git-pr)
 ```
 
 ### 리팩토링
 ```
-refactor-architect (opus) → plan.md 업데이트 → 사용자 재승인
-→ component-auditor (haiku)
-→ implementer (sonnet)
-→ test-runner (sonnet)
-→ reviewer (opus)
-→ git-branch(refactor/) → git-commit → git-pr
+1. Agent(refactor-architect, model=opus) — 패턴 탐지 → plan.md 업데이트
+2. 사용자 재승인 대기
+3. Agent(component-auditor, model=haiku) — 재사용 컴포넌트 확인
+4. Agent(developer, model=sonnet)        — 리팩토링 구현
+5. Agent(test-runner, model=sonnet)      — 테스트 검증
+6. Agent(reviewer, model=opus)           — 코드 리뷰
+7. Agent(git-branch(refactor/) → git-commit → git-pr)
 ```
 
 ### 코드 리뷰
 ```
-reviewer (opus) → 결과 출력
+1. Agent(reviewer, model=opus) → 결과 출력
 ```
 
 ---
@@ -162,6 +169,9 @@ reviewer (opus) → 결과 출력
 
 ## Constraints
 
+- **오케스트레이터는 절대 직접 코드를 작성하지 않는다. 위반 시 즉시 중단.**
+- plan.md 작성 외에 Write/Edit 툴을 사용하지 않는다.
+- 각 에이전트 호출 시 agents/*.md 내용과 현재 컨텍스트를 프롬프트에 포함한다.
 - setup은 자동으로 처리한다. 사용자에게 `/setup`을 요구하지 않는다.
 - plan.md 없이 구현을 시작하지 않는다.
 - 사용자 승인 없이 실행 단계로 넘어가지 않는다.
