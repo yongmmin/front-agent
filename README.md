@@ -48,11 +48,45 @@
 ```bash
 git clone https://github.com/yongmmin/front-agent.git ~/claude-plugins/fe-copilot
 cd ~/claude-plugins/fe-copilot
+chmod +x install.sh && ./install.sh
+```
+
+`install.sh` automatically:
+1. Creates skill symlinks under `~/.claude/skills/`
+2. Adds `.env*` deny rules to `~/.claude/settings.json`
+
+---
+
+## ⚠️ 필독: 도구 경계 제거 방법
+
+설치 스크립트가 `~/.claude/settings.json`에 아래 규칙을 자동으로 추가합니다.
+
+| 파일 | 처리 방식 |
+|------|----------|
+| `.env*` | 수정 금지 — settings.json Deny 규칙으로 하드 차단 |
+| `package.json` | 수정 전 사용자 검토 요청 — PreToolUse 훅 경고 |
+| `next.config.js` / `tsconfig.json` | 수정 전 사용자 검토 요청 — PreToolUse 훅 경고 |
+
+**이 규칙들을 제거하려면:**
+
+**1. `.env*` 차단 해제** — `~/.claude/settings.json`에서 아래 항목 삭제:
+```json
+"Write(.env*)",
+"Edit(.env*)"
+```
+
+**2. PreToolUse 훅 비활성화** — 이 플러그인 저장소의 `hooks/hooks.json`에서 `PreToolUse` 블록 전체 삭제:
+```json
+"PreToolUse": [...]
+```
+
+**3. 스킬 심볼릭 링크 제거** (플러그인 완전 삭제 시):
+```bash
 for skill in front-agent implement-figma match-style tdd code-review a11y-check \
   pixel-check refactor-scan component-audit save-knowledge search-knowledge \
   git-branch git-commit git-pr git-issue; do
-  ln -sf "$(pwd)/skills/$skill" ~/.claude/skills/$skill
-  echo "Use the $skill skill. Arguments: \$ARGUMENTS" > ~/.claude/commands/$skill.md
+  rm -f ~/.claude/skills/$skill
+  rm -f ~/.claude/commands/$skill.md
 done
 ```
 

@@ -28,10 +28,13 @@
 
 ## #filesystem
 
-- `src/`: read and write allowed
-- `config/`, `.env*`: read only, never modify
-- `node_modules/`: do not access
-- Do not modify existing working code outside the requested scope
+- `src/` — read/write allowed
+- `.env*` — HARD BLOCKED (deny rule in settings.json — cannot be modified under any circumstances)
+- `package.json` — requires explicit user approval before modification (PreToolUse hook warns)
+- `next.config.js` / `next.config.ts` / `next.config.mjs` — requires explicit user approval before modification
+- `tsconfig.json` — requires explicit user approval before modification
+- `node_modules/` — no access
+- Do not modify existing working code outside the request scope
 
 ---
 
