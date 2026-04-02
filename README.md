@@ -283,6 +283,34 @@ knowledge/
 - **search-knowledge Step 0**: 구현 전에 이미 존재하는 유사 컴포넌트, 이전 결정사항, 알려진 이슈를 먼저 확보. 중복 구현 방지 + 일관성 향상. haiku 모델 사용으로 토큰 오버헤드 최소화
 - **스킬 수 감소**: 18개 → 14개. 각 스킬이 워크플로우에서 명확한 호출 시점을 가짐
 
+### v3 → v4: 하네스 엔지니어링 적용 (진행 중)
+
+하네스 엔지니어링(Harness Engineering)은 AI가 실수했을 때 프롬프트를 고치는 대신, **그 실수가 구조적으로 반복 불가능하도록 시스템을 바꾸는 기법**입니다.
+
+> "AI 에이전트가 실수했을 때, 프롬프트를 고치지 마세요. 마구(harness)를 고치세요."
+
+#### 4가지 기둥 대비 현재 갭 분석
+
+| 기둥 | 개념 | 현재 상태 | 적용 계획 |
+|------|------|----------|----------|
+| 컨텍스트 파일 | AI가 따를 런타임 설정 | ✅ CLAUDE.md 존재, 자연어 규칙 | constraints.md로 구조화 |
+| CI/CD 게이트 | 자동 교정 루프 | ❌ PostToolUse 훅 없음 | PostToolUse + harness_loop 추가 |
+| 도구 경계 | 명시적 접근 제한 | ⚠️ 일부만 설정 | constraints.md로 명시화 |
+| 피드백 루프 | 실패 → 규칙 자동화 | ⚠️ 수동 저장만 존재 | 실패 패턴 → 규칙 자동 추가 |
+
+#### harness_loop 핵심 개념
+
+기존 플러그인은 `테스트 실행 → 완료 선언` 구조였습니다. v4에서는:
+
+```
+while (!isTaskComplete && attempt < MAX_ATTEMPTS) {
+  코드 생성 → 자동 테스트 → 실패 시 에러를 에이전트에게 피드백 → 재시도
+}
+3회 초과 → GitHub 이슈 자동 생성 + 중단
+```
+
+사람이 결과를 보기 전에 AI가 스스로 오류를 수정하는 구조입니다.
+
 ---
 
 ## 고도화 방향
@@ -292,6 +320,12 @@ knowledge/
 - [ ] **Obsidian 연동** — Wisdom Hub를 Obsidian vault로 교체, 그래프 뷰·wikilink 추적성 확보
 - [ ] **Codex CLI 통합** — 독립 adversarial 코드 리뷰로 self-review 편향 제거
 - [ ] **Lighthouse CI 연동** — 성능 지표 자동 검사
+- [ ] **PostToolUse 훅** — 파일 저장 즉시 자동 typecheck/lint, 에러 자동 피드백
+- [ ] **harness_loop** — 테스트 실패 → 에러 피드백 → 자동 재시도 (MAX_ATTEMPTS=3)
+- [ ] **isAmbiguous 체크** — 모호한 요청은 plan 전에 명확화 질문 강제
+- [ ] **constraints.md** — 전역 제약을 모든 에이전트 호출에 pin
+- [ ] **Worker output constraints** — 에이전트 "코드만 출력" 강제
+- [ ] **실패 패턴 → 규칙 루프** — reviewer FAIL 시 constraints.md에 자동 규칙 추가
 
 ---
 
