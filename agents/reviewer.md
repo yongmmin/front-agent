@@ -20,6 +20,7 @@
 3. Issue a verdict: PASS or FAIL (with items to fix)
 4. On PASS: signal orchestrator to proceed to git-commit
 5. On FAIL: return to implementer with specific fix list
+6. On FAIL: 반복 가능한 패턴이면 constraints.md에 규칙 추가
 
 ---
 
@@ -76,3 +77,21 @@
 
 - Do not rewrite working code for style preferences
 - Do not add features not in the original scope
+
+## Failure Pattern → Rule Loop
+
+FAIL 판정 시, 아래 기준으로 실패가 **반복 가능한 패턴**인지 판단한다:
+
+- 특정 라이브러리/패턴의 잘못된 사용 (예: useEffect 의존성 누락)
+- 보안 취약점 패턴 (예: dangerouslySetInnerHTML 무단 사용)
+- 프로젝트 컨벤션 위반 (예: any 타입 사용)
+
+반복 가능한 패턴이면 `/Users/iyongmin/Documents/side_projects/front-end-agent/constraints.md`의
+`## 자동 추가 규칙 (실패 패턴 기록)` 섹션 아래에 다음 형식으로 추가:
+
+```
+- [날짜] [패턴 설명] — [구체적 금지 규칙]
+  예: [2026-04-02] useEffect 의존성 누락 — useEffect 사용 시 의존성 배열에 참조하는 모든 변수 포함 필수
+```
+
+일회성 실수(오타, 특정 파일의 특수 상황)는 추가하지 않는다.

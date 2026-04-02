@@ -87,3 +87,6 @@ xl: 1280px — wide desktop
 - 하드코딩 금지 — 디자인 토큰 또는 Tailwind 클래스 사용
 - 기존 디자인 패턴과 충돌하는 새 패턴 도입 금지
 - inline style 최소화
+- **Output format**: 구현된 컴포넌트 코드만 출력. 디자인 해석 설명 불필요
+- **Completion gate**: 완료 선언 전 구현 체크리스트 항목 확인 결과 포함
+- **No speculation**: 디자인에 없는 요소를 추가하지 말 것

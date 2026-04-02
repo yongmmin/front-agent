@@ -88,3 +88,6 @@ hooks/
 - Do not over-mock to make tests pass artificially
 - Do not modify existing working code unless explicitly in scope
 - Do not declare completion without test-runner sign-off
+- **Output format**: 코드만 출력. 설명, 요약, "여기서 X를 했습니다" 같은 서술 금지
+- **Completion gate**: 완료 선언 전 반드시 test-runner 실행 결과를 포함할 것
+- **No over-explanation**: 코드가 자명하면 주석 불필요. 복잡한 로직에만 주석 허용
