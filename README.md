@@ -283,7 +283,7 @@ knowledge/
 - **search-knowledge Step 0**: 구현 전에 이미 존재하는 유사 컴포넌트, 이전 결정사항, 알려진 이슈를 먼저 확보. 중복 구현 방지 + 일관성 향상. haiku 모델 사용으로 토큰 오버헤드 최소화
 - **스킬 수 감소**: 18개 → 14개. 각 스킬이 워크플로우에서 명확한 호출 시점을 가짐
 
-### v3 → v4: 하네스 엔지니어링 적용 (진행 중)
+### v3 → v4: 하네스 엔지니어링 적용 ✅
 
 하네스 엔지니어링(Harness Engineering)은 AI가 실수했을 때 프롬프트를 고치는 대신, **그 실수가 구조적으로 반복 불가능하도록 시스템을 바꾸는 기법**입니다.
 
@@ -311,6 +311,93 @@ while (!isTaskComplete && attempt < MAX_ATTEMPTS) {
 
 사람이 결과를 보기 전에 AI가 스스로 오류를 수정하는 구조입니다.
 
+#### 실제 구현 내용
+
+**1. PostToolUse 훅** (`hooks/post-tool-use.sh`)
+
+Write/Edit 툴로 `.ts`/`.tsx` 파일이 저장될 때마다 자동 실행:
+- `tsc --noEmit` — TypeScript 타입 에러 즉시 감지
+- `npx eslint` — 린트 규칙 위반 감지
+- 에러 발생 시 `exit 2`로 Claude에게 즉시 피드백 → 다음 코드 생성에 반영
+
+이전: 에러가 있어도 저장됨 → 사람이 나중에 발견
+이후: 저장 즉시 에러 감지 → Claude가 자동 수정
+
+---
+
+**2. harness_loop** (`skills/front-agent/SKILL.md`)
+
+테스트 통과 전까지 AI가 완료를 선언할 수 없는 강제 루프:
+
+```
+while attempt < 3:
+  구현 → test-runner 검증
+  실패 시: 에러를 에이전트에게 피드백 후 재시도
+3회 초과: GitHub 이슈 자동 생성 + 중단
+```
+
+이전: 테스트 실패해도 "완료" 선언 가능
+이후: 테스트 통과 or 이슈 생성 둘 중 하나만 가능
+
+---
+
+**3. isAmbiguous 체크** (`skills/front-agent/SKILL.md`)
+
+plan 생성 전에 요청 모호성을 먼저 판단:
+- 대상 불명확, API 스펙 없음, 범위 과도, 기술 선택 모호 → 명확화 질문 (최대 2개)
+- 명확한 요청은 이 단계 건너뜀
+
+이전: 모호한 요청도 바로 plan 생성 → 잘못된 방향으로 실행 가능
+이후: 핵심 정보 확보 후 plan 생성
+
+---
+
+**4. constraints.md** (신규 파일)
+
+모든 에이전트 호출 시 자동으로 포함되는 전역 제약:
+- 새 라이브러리 도입 금지
+- 외부 API 직접 호출 금지
+- `any` 타입 금지, 파일시스템 경계 명시
+- **자동 추가 규칙 섹션**: AI가 실수할 때마다 새 규칙이 여기에 기록됨
+
+이전: 규칙이 CLAUDE.md 자연어로만 존재 → 에이전트가 우회 가능
+이후: 구조화된 제약이 모든 호출에 pin됨
+
+---
+
+**5. Worker output constraints** (`agents/*.md`)
+
+developer / ui-builder / api-integrator 에이전트에 강제 규칙 추가:
+- 코드만 출력, 설명·요약 금지
+- 완료 선언 전 테스트 결과 포함 필수
+
+이전: 에이전트가 코드 + 긴 설명 + 요약을 같이 출력 → 토큰 낭비
+이후: 코드만 출력, 컨텍스트 효율 향상
+
+---
+
+**6. 실패 패턴 → 규칙 루프** (`agents/reviewer.md`, `agents/test-runner.md`)
+
+AI의 실수가 새 규칙이 되는 자동화 사이클:
+- reviewer FAIL: 반복 패턴이면 constraints.md에 자동 append
+- test-runner 3회 실패: 실패 패턴을 constraints.md에 기록 후 중단
+
+이전: 실패해도 다음 세션에서 같은 실수 반복 가능
+이후: 실패 → 규칙화 → 다음 세션에서 방지
+
+---
+
+#### 남은 과제
+
+이 구현들은 **문서 레벨 제약**입니다. 진정한 하네스 엔지니어링을 위해 추가로 고려할 수 있는 방향:
+
+| 방향 | 설명 |
+|------|------|
+| 구조 테스트 | 의존성 규칙을 실제 테스트 코드로 강제 (e.g. jest-architecture) |
+| 도구 경계 하드 강제 | settings.json Deny 규칙으로 파일시스템 경계를 Claude Code 레벨에서 차단 |
+| Codex adversarial review | Claude가 쓴 코드를 다른 AI가 독립 검토 (self-review 편향 제거) |
+| constraints.md 버전 관리 | 규칙 추가 시 날짜·이유 기록, 오래된 규칙 정기 검토 |
+
 ---
 
 ## 고도화 방향
@@ -320,12 +407,12 @@ while (!isTaskComplete && attempt < MAX_ATTEMPTS) {
 - [ ] **Obsidian 연동** — Wisdom Hub를 Obsidian vault로 교체, 그래프 뷰·wikilink 추적성 확보
 - [ ] **Codex CLI 통합** — 독립 adversarial 코드 리뷰로 self-review 편향 제거
 - [ ] **Lighthouse CI 연동** — 성능 지표 자동 검사
-- [ ] **PostToolUse 훅** — 파일 저장 즉시 자동 typecheck/lint, 에러 자동 피드백
-- [ ] **harness_loop** — 테스트 실패 → 에러 피드백 → 자동 재시도 (MAX_ATTEMPTS=3)
-- [ ] **isAmbiguous 체크** — 모호한 요청은 plan 전에 명확화 질문 강제
-- [ ] **constraints.md** — 전역 제약을 모든 에이전트 호출에 pin
-- [ ] **Worker output constraints** — 에이전트 "코드만 출력" 강제
-- [ ] **실패 패턴 → 규칙 루프** — reviewer FAIL 시 constraints.md에 자동 규칙 추가
+- [x] **PostToolUse 훅** — 파일 저장 즉시 자동 typecheck/lint, 에러 자동 피드백
+- [x] **harness_loop** — 테스트 실패 → 에러 피드백 → 자동 재시도 (MAX_ATTEMPTS=3)
+- [x] **isAmbiguous 체크** — 모호한 요청은 plan 전에 명확화 질문 강제
+- [x] **constraints.md** — 전역 제약을 모든 에이전트 호출에 pin
+- [x] **Worker output constraints** — 에이전트 "코드만 출력" 강제
+- [x] **실패 패턴 → 규칙 루프** — reviewer FAIL 시 constraints.md에 자동 규칙 추가
 
 ---
 
