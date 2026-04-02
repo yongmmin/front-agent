@@ -16,18 +16,18 @@
 
 ## Workflow
 
-### Figma URL 있는 경우
-1. Figma MCP (`get_design_context`)로 디자인 데이터 및 스크린샷 fetch
-2. component-auditor 결과 검토 — 기존 컴포넌트 재사용
-3. 디자인 토큰 추출 → 프로젝트 토큰 시스템에 매핑
-4. 반응형 구현 (mobile-first)
-5. a11y-check에 인계
+### With Figma URL
+1. Fetch design data and screenshot via Figma MCP (`get_design_context`)
+2. Review component-auditor results — reuse existing components
+3. Extract design tokens → map to project token system
+4. Implement responsive layout (mobile-first)
+5. Hand off to a11y-check
 
-### Figma URL 없는 경우
-1. 기존 컴포넌트/페이지에서 스타일 패턴 추출
-2. `knowledge/design-system.md` 로드 (있을 경우)
-3. 추출된 패턴으로 새 UI 구현
-4. a11y-check에 인계
+### Without Figma URL
+1. Extract style patterns from existing components/pages
+2. Load `knowledge/design-system.md` if available
+3. Implement new UI using extracted patterns
+4. Hand off to a11y-check
 
 ---
 
@@ -38,27 +38,26 @@ get_design_context(fileKey, nodeId)
 → Returns: code hints, screenshot, design tokens
 ```
 
-- Code Connect 스니펫 있으면 → 매핑된 컴포넌트 직접 사용
-- Raw hex / absolute positioning → 스크린샷 참조 후 프로젝트 컨벤션 적용
+- If Code Connect snippets exist → use mapped component directly
+- Raw hex / absolute positioning → reference screenshot, apply project conventions
 
 ---
 
-## Style Extraction (Figma 없을 때)
+## Style Extraction (Without Figma)
 
 ```tsx
-// 기존 패턴 주석으로 명시
 // Follows existing card pattern: rounded-xl border border-gray-200 shadow-sm p-6
 // Matches button convention: primary uses bg-blue-600 text-white
 ```
 
-추출 항목:
-- 컬러, 타이포그래피, 스페이싱 리듬
-- Border radius, shadow 패턴
-- 버튼/폼/카드 컴포넌트 패턴
+Extract:
+- Colors, typography, spacing rhythm
+- Border radius, shadow patterns
+- Button / form / card component patterns
 
 ---
 
-## Responsive Breakpoints (Tailwind 기본)
+## Responsive Breakpoints (Tailwind defaults)
 
 ```
 sm: 640px  — mobile landscape
@@ -75,18 +74,18 @@ xl: 1280px — wide desktop
 
 ## Implementation Checklist
 
-- [ ] 레이아웃이 디자인/기존 스타일과 일치
-- [ ] 반응형 (mobile / tablet / desktop)
-- [ ] 인터랙티브 상태 (hover, focus, disabled)
-- [ ] 로딩 / 빈 상태 포함
+- [ ] Layout matches design / existing style
+- [ ] Responsive (mobile / tablet / desktop)
+- [ ] Interactive states (hover, focus, disabled)
+- [ ] Loading / empty states included
 
 ---
 
 ## Constraints
 
-- 하드코딩 금지 — 디자인 토큰 또는 Tailwind 클래스 사용
-- 기존 디자인 패턴과 충돌하는 새 패턴 도입 금지
-- inline style 최소화
-- **Output format**: 구현된 컴포넌트 코드만 출력. 디자인 해석 설명 불필요
-- **Completion gate**: 완료 선언 전 구현 체크리스트 항목 확인 결과 포함
-- **No speculation**: 디자인에 없는 요소를 추가하지 말 것
+- No hardcoding — use design tokens or Tailwind classes
+- Do not introduce patterns that conflict with existing design system
+- Minimize inline styles
+- **Output format**: Output component code only. No design interpretation narration.
+- **Completion gate**: Confirm all checklist items before declaring completion.
+- **No speculation**: Do not add elements not present in the design.

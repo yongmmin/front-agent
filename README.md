@@ -72,11 +72,14 @@ done
 
 ```
 /front-agent [요청]
-  → isAmbiguous? 모호하면 명확화 질문 (최대 2개)
+  → isAmbiguous 체크 — 모호하면 명확화 질문 (최대 2개)
+  → search-knowledge (haiku) — 관련 패턴/컴포넌트/결정사항 로드
+  → component-auditor (haiku) — 재사용 가능 컴포넌트 탐색
   → plan.md 생성 + 사용자 승인
-  → harness_loop: 구현 → 테스트 → 실패 시 피드백 → 재시도 (MAX 3회)
-  → reviewer → git-branch → git-commit → git-pr
-  → 완료 후 knowledge/ 저장
+  → [인텐트별 실행: feature / figma / ui / refactor]
+  → reviewer (opus) — 코드 품질/TypeScript/보안 리뷰
+  → git-branch → git-commit → git-pr
+  → save-knowledge
 ```
 
 ---
