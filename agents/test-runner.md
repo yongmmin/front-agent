@@ -20,12 +20,12 @@
 3. Analyze results
 4. Based on outcome:
    - **Pass**: Summarize results and report to orchestrator
-   - **Fail**: 
-     - GitHub issue 생성 (git-issue skill)
-     - 실패가 3회 연속(harness_loop MAX_ATTEMPTS 도달)이면:
-       - 실패 패턴을 분석해 constraints.md `## 자동 추가 규칙` 섹션에 추가
-       - 형식: `- [날짜] [테스트명] — [실패 원인 한 줄 요약]`
-     - 오케스트레이터에게 실패 보고 및 중단 요청
+   - **Fail**:
+     - Create GitHub issue via git-issue skill
+     - If this is the 3rd consecutive failure (harness_loop MAX_ATTEMPTS reached):
+       - Analyze failure pattern and append to `constraints.md` `## #failure-patterns` section
+       - Format: `- [YYYY-MM-DD] [test name] — [one-line failure cause]`
+     - Report failure to orchestrator and request stop
 
 ---
 
@@ -72,5 +72,5 @@ Body:
 
 - Never hide or ignore test failures
 - Never modify test code to make tests pass
-- 3회 연속 실패 패턴은 반드시 constraints.md에 기록 후 중단
-- 패턴 기록 없이 중단하지 않는다
+- On 3 consecutive failures, record the pattern in constraints.md before stopping
+- Do not stop without recording the failure pattern

@@ -6,23 +6,23 @@ description: Search the knowledge base and global wisdom hub for relevant inform
 # Skill: search-knowledge
 
 **Trigger**: `/search-knowledge [query]` or auto-called by agents needing context
-**Purpose**: 프로젝트 knowledge/와 전역 wisdom hub(`~/.front-agent/wisdom/`)에서 관련 정보를 검색한다.
+**Purpose**: Search project `knowledge/` and global wisdom hub (`~/.front-agent/wisdom/`) for relevant information.
 
 ---
 
-## 검색 우선순위
+## Search Priority
 
-1. `~/.front-agent/wisdom/summary.md` — 항상 로드 (20줄, 최소 토큰)
-2. `knowledge/index.md` — 프로젝트 컨텍스트
-3. 쿼리에 따라 상세 파일 선택 로드:
-   - 교훈 관련 → `~/.front-agent/wisdom/learnings.md`
-   - 결정 관련 → `~/.front-agent/wisdom/decisions.md`
-   - 이슈 관련 → `~/.front-agent/wisdom/issues.md`
-   - 컴포넌트 관련 → `knowledge/components.md`
-   - 패턴 관련 → `knowledge/patterns.md`
-   - 디자인 관련 → `knowledge/design-system.md`
+1. `~/.front-agent/wisdom/summary.md` — always load (20 lines, minimal tokens)
+2. `knowledge/index.md` — project context
+3. Load detail files on demand based on query:
+   - Learnings → `~/.front-agent/wisdom/learnings.md`
+   - Decisions → `~/.front-agent/wisdom/decisions.md`
+   - Issues → `~/.front-agent/wisdom/issues.md`
+   - Components → `knowledge/components.md`
+   - Patterns → `knowledge/patterns.md`
+   - Design → `knowledge/design-system.md`
 
-**핵심 원칙**: 필요한 파일만 로드한다. 전체 파일을 한꺼번에 로드하지 않는다.
+**Core principle**: Load only what is needed. Do not load all files at once.
 
 ---
 
@@ -31,20 +31,20 @@ description: Search the knowledge base and global wisdom hub for relevant inform
 ```
 ## Knowledge Search: "[query]"
 
-### Wisdom (전역)
-[summary.md 관련 항목]
+### Wisdom (global)
+[relevant entries from summary.md]
 
-### 프로젝트 Knowledge
-[knowledge/index.md 관련 항목]
+### Project Knowledge
+[relevant entries from knowledge/index.md]
 
-### 상세 (온디맨드 로드)
-[관련 상세 파일 발췌]
+### Detail (on-demand loaded)
+[excerpts from relevant detail files]
 ```
 
 ---
 
 ## Constraints
 
-- haiku 모델 사용 (읽기 전용, 수정 없음)
-- 관련 없는 파일은 로드하지 않는다
-- 결과가 없으면 "해당 내용 없음" 명시
+- Use haiku model (read-only, no modifications)
+- Do not load files unrelated to the query
+- If no results found, explicitly state "No relevant entries found"

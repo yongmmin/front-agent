@@ -6,27 +6,27 @@ description: Save learnings, decisions, and component info to the knowledge base
 # Skill: save-knowledge
 
 **Trigger**: `/save-knowledge [topic]` or auto-called after task completion
-**Purpose**: 학습 내용을 프로젝트 knowledge/와 전역 wisdom hub(`~/.front-agent/wisdom/`)에 저장한다.
+**Purpose**: Save learnings to the project `knowledge/` and global wisdom hub (`~/.front-agent/wisdom/`).
 
 ---
 
-## 저장 위치 결정
+## Storage Location
 
-| 내용 유형 | 저장 위치 |
-|----------|----------|
-| 컴포넌트, 패턴, 디자인 규칙 | `knowledge/` (프로젝트 한정) |
-| 교훈 (learnings) | `~/.front-agent/wisdom/learnings.md` + summary 갱신 |
-| 설계 결정 (decisions) | `~/.front-agent/wisdom/decisions.md` + summary 갱신 |
-| 알려진 이슈 (issues) | `~/.front-agent/wisdom/issues.md` + summary 갱신 |
+| Content Type | Storage Location |
+|-------------|-----------------|
+| Components, patterns, design rules | `knowledge/` (project-scoped) |
+| Learnings | `~/.front-agent/wisdom/learnings.md` + update summary |
+| Decisions | `~/.front-agent/wisdom/decisions.md` + update summary |
+| Known issues | `~/.front-agent/wisdom/issues.md` + update summary |
 
 ---
 
 ## Workflow
 
-1. 저장할 내용의 유형 판단
-2. 해당 파일에 항목 추가
-3. `~/.front-agent/wisdom/summary.md` 갱신 (20줄 이하 유지)
-   - 초과 시 가장 오래된 항목 1개 삭제 후 추가
+1. Determine the type of content to save
+2. Append entry to the appropriate file
+3. Update `~/.front-agent/wisdom/summary.md` (keep under 20 lines)
+   - If over limit: delete the oldest entry before adding the new one
 
 ---
 
@@ -34,50 +34,50 @@ description: Save learnings, decisions, and component info to the knowledge base
 
 ### Learnings
 ```
-- [날짜] [프로젝트명] 내용
+- [YYYY-MM-DD] [project-name] content
 ```
 
 ### Decisions
 ```
-- [날짜] [프로젝트명] 결정 — 이유
+- [YYYY-MM-DD] [project-name] decision — reason
 ```
 
 ### Issues
 ```
-- [날짜] [프로젝트명] 문제 — 해결책 또는 주의사항
+- [YYYY-MM-DD] [project-name] problem — solution or warning
 ```
 
-### summary.md 갱신 포맷
+### summary.md Update Format
 ```markdown
 # Wisdom Summary
-> 20줄 제한.
+> 20-line limit.
 
 ## Learnings
-- [최근 3개만 유지]
+- [keep latest 3 only]
 
 ## Decisions
-- [최근 3개만 유지]
+- [keep latest 3 only]
 
 ## Issues
-- [최근 3개만 유지]
+- [keep latest 3 only]
 ```
 
 ---
 
-## 프로젝트 knowledge/ 저장 (컴포넌트/패턴/디자인)
+## Project knowledge/ Storage (components/patterns/design)
 
 | Type | File |
 |------|------|
-| 컴포넌트 | `knowledge/components.md` |
-| 코드 패턴 | `knowledge/patterns.md` |
-| 디자인 규칙 | `knowledge/design-system.md` |
+| Components | `knowledge/components.md` |
+| Code patterns | `knowledge/patterns.md` |
+| Design rules | `knowledge/design-system.md` |
 
-300줄 초과 시 도메인 서브파일로 분리 후 index.md에서 링크.
+If over 300 lines, split into domain sub-files and link from index.md.
 
 ---
 
 ## Constraints
 
-- summary.md는 절대 20줄을 초과하지 않는다
-- learnings/decisions/issues.md는 300줄 제한
-- 프로젝트명을 항상 항목에 포함해 어느 프로젝트 맥락인지 추적 가능하게 한다
+- summary.md must never exceed 20 lines
+- learnings/decisions/issues.md have a 300-line limit
+- Always include the project name in each entry for traceability

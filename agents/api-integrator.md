@@ -77,6 +77,6 @@ Use whatever is already installed in the project:
 
 - Never hardcode API keys or secrets — use environment variables
 - Never silently swallow errors
-- **Output format**: 훅/서비스 코드만 출력. API 동작 설명 불필요
-- **Completion gate**: 완료 선언 전 loading/error/success 3가지 상태 구현 확인
-- **No external calls**: 환경변수에 없는 외부 서비스 직접 호출 금지
+- **Output format**: Output hook/service code only. No API behavior explanations.
+- **Completion gate**: Confirm loading/error/success — all 3 states implemented before declaring done.
+- **No external calls**: Do not call external services not defined in environment variables.

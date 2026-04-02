@@ -1,52 +1,52 @@
 # Knowledge Index
 
-> 세션 시작 시 자동 로드. 300줄 이내 유지.
-> 도메인별 상세 내용은 링크된 파일 참조.
+> Auto-loaded at session start. Keep under 300 lines.
+> See linked domain files for detailed content.
 
 ---
 
-## 프로젝트 개요
+## Project Overview
 
-- **스택**: React, Next.js, TypeScript
+- **Stack**: React, Next.js, TypeScript
 - **Git**: GitHub
-- **디자인**: Figma (MCP 연결)
+- **Design**: Figma (MCP connected)
 
 ---
 
-## 도메인 파일
+## Domain Files
 
-| 파일 | 내용 |
-|------|------|
-| [components.md](components.md) | 컴포넌트 목록 및 사용법 |
-| [design-system.md](design-system.md) | 디자인 시스템 규칙, 토큰 |
-| [patterns.md](patterns.md) | 확립된 코드 패턴 |
-
----
-
-## 컴포넌트 현황
-
-_아직 기록된 컴포넌트 없음. `/save-knowledge`로 추가._
+| File | Content |
+|------|---------|
+| [components.md](components.md) | Component list and usage |
+| [design-system.md](design-system.md) | Design system rules and tokens |
+| [patterns.md](patterns.md) | Established code patterns |
 
 ---
 
-## 확립된 패턴
+## Component Status
 
-_아직 기록된 패턴 없음._
-
----
-
-## 알려진 이슈
-
-_아직 기록된 이슈 없음._
+_No components recorded yet. Add with `/save-knowledge`._
 
 ---
 
-## 기능 기록
+## Established Patterns
 
-| 기능 | 파일 | 상태 |
-|------|------|------|
-| _없음_ | — | — |
+_No patterns recorded yet._
 
 ---
 
-> **규칙**: 이 파일이 300줄을 넘으면 도메인별 파일로 분리 후 링크로 대체한다.
+## Known Issues
+
+_No issues recorded yet._
+
+---
+
+## Feature Log
+
+| Feature | File | Status |
+|---------|------|--------|
+| _none_ | — | — |
+
+---
+
+> **Rule**: If this file exceeds 300 lines, split into domain files and replace with links.
