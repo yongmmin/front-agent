@@ -113,8 +113,11 @@ plan.md 생성 후:
 각 에이전트를 호출할 때는 해당 에이전트 파일(`agents/*.md`) 내용을 프롬프트에 포함하고,
 현재까지의 컨텍스트(plan.md 내용, 이전 에이전트 결과)를 함께 전달한다.
 
+> **모든 워크플로우 공통 Step 0**: `search-knowledge (haiku)` — 관련 패턴/컴포넌트/결정사항 먼저 로드
+
 ### Figma 구현
 ```
+0. Skill(search-knowledge, model=haiku)  — 관련 지식 로드
 1. Agent(component-auditor, model=haiku) — 재사용 컴포넌트 탐색
 2. Agent(ui-builder, model=sonnet)       — Figma MCP로 디자인 구현 + 반응형
 3. Agent(ui-builder, model=sonnet)       — pixel-check: 디자인 vs 구현 비교
@@ -125,6 +128,7 @@ plan.md 생성 후:
 
 ### UI 구현 (Figma 없음)
 ```
+0. Skill(search-knowledge, model=haiku)  — 관련 지식 로드
 1. Agent(component-auditor, model=haiku) — 재사용 컴포넌트 탐색
 2. Agent(ui-builder, model=sonnet)       — 기존 스타일 매칭 후 구현
 3. Agent(ui-builder, model=sonnet)       — a11y-check: 접근성 검사
@@ -134,23 +138,23 @@ plan.md 생성 후:
 
 ### 기능 구현
 ```
-1. Agent(component-auditor, model=haiku)  — 재사용 컴포넌트 탐색
-2. Agent(developer, model=sonnet)         — 테스트 작성 + 기능 구현
-3. Agent(api-integrator, model=sonnet)    — API 연결 (필요 시)
-4. Agent(test-runner, model=sonnet)       — 테스트 실행 및 검증
-5. Agent(reviewer, model=opus)            — 코드 리뷰
-6. Agent(git-branch → git-commit → git-pr)
+0. Skill(search-knowledge, model=haiku)  — 관련 지식 로드
+1. Agent(component-auditor, model=haiku) — 재사용 컴포넌트 탐색
+2. Skill(tdd, model=sonnet)              — RED→GREEN→REFACTOR TDD 사이클 전담
+3. Agent(api-integrator, model=sonnet)   — API 연결 (필요 시)
+4. Agent(reviewer, model=opus)           — 코드 리뷰
+5. Agent(git-branch → git-commit → git-pr)
 ```
 
 ### 리팩토링
 ```
+0. Skill(search-knowledge, model=haiku)  — 관련 지식 로드
 1. Agent(refactor-architect, model=opus) — 패턴 탐지 → plan.md 업데이트
 2. 사용자 재승인 대기
 3. Agent(component-auditor, model=haiku) — 재사용 컴포넌트 확인
-4. Agent(developer, model=sonnet)        — 리팩토링 구현
-5. Agent(test-runner, model=sonnet)      — 테스트 검증
-6. Agent(reviewer, model=opus)           — 코드 리뷰
-7. Agent(git-branch(refactor/) → git-commit → git-pr)
+4. Skill(tdd, model=sonnet)              — 리팩토링 구현 + 테스트 검증
+5. Agent(reviewer, model=opus)           — 코드 리뷰
+6. Agent(git-branch(refactor/) → git-commit → git-pr)
 ```
 
 ### 코드 리뷰

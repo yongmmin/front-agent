@@ -160,55 +160,53 @@ feat/기능명
 
 | 스킬 | 역할 |
 |------|------|
-| `plan-feature` | 기능 구현 플랜 생성 |
-| `execute-feature` | 승인된 플랜 실행 |
+| `search-knowledge` | Step 0: 모든 워크플로우 시작 전 관련 지식 로드 |
+| `tdd` | 기능/리팩토링 구현 전담 (RED→GREEN→REFACTOR) |
 | `implement-figma` | Figma → 코드 |
 | `match-style` | 기존 UI 스타일 매칭 |
-| `tdd` | TDD 워크플로우 |
 | `code-review` | 코드 리뷰 |
 | `a11y-check` | 접근성 검사 |
 | `pixel-check` | 디자인 vs 구현 비교 |
 | `refactor-scan` | 반복 패턴 탐지 |
 | `component-audit` | 컴포넌트 중복 감사 |
 | `save-knowledge` | 지식 저장 |
-| `search-knowledge` | 지식 검색 |
 | `git-branch` | 브랜치 생성 |
 | `git-commit` | 커밋 자동화 |
 | `git-pr` | PR 생성 |
 | `git-issue` | 이슈 생성 |
-| `setup` | 초기 설정 (Lazy — 자동 실행) |
 
 ---
 
 ## 핵심 워크플로우
 
+> **모든 워크플로우**: Step 0으로 `search-knowledge (haiku)` 실행 — 관련 패턴/컴포넌트/결정사항 먼저 로드
+
 ### 기능 구현
 ```
-component-auditor → developer (테스트 + 구현)
-→ api-integrator → test-runner → reviewer
+search-knowledge → component-auditor → tdd (RED→GREEN→REFACTOR)
+→ api-integrator → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### Figma 구현
 ```
-component-auditor → ui-builder (Figma MCP + 반응형)
+search-knowledge → component-auditor → ui-builder (Figma MCP + 반응형)
 → pixel-check → a11y-check → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### 디자인 없는 UI
 ```
-component-auditor → ui-builder (기존 스타일 매칭)
+search-knowledge → component-auditor → ui-builder (기존 스타일 매칭)
 → a11y-check → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### 리팩토링
 ```
-refactor-architect (패턴 탐지 → 재설계안 plan.md)
-→ 검토 승인 → component-auditor → implementer
-→ test-runner → reviewer
-→ git-branch(refactor/) → git-commit → git-pr
+search-knowledge → refactor-architect (패턴 탐지 → 재설계안 plan.md)
+→ 검토 승인 → component-auditor → tdd (구현 + 테스트 검증)
+→ reviewer → git-branch(refactor/) → git-commit → git-pr
 ```
 
 ---

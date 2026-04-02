@@ -2,10 +2,10 @@
 
 # Frontend Co-Pilot
 
-**Claude Code 플러그인 — 7개 에이전트, 18개 온디맨드 스킬, Plan-First 워크플로우**
+**Claude Code 플러그인 — 7개 에이전트, 14개 온디맨드 스킬, Plan-First 워크플로우**
 
 [![Agents](https://img.shields.io/badge/agents-7-green.svg)](#에이전트-agents)
-[![Skills](https://img.shields.io/badge/skills-18-orange.svg)](#내부-에이전트-도구)
+[![Skills](https://img.shields.io/badge/skills-14-orange.svg)](#내부-에이전트-도구)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Stack](https://img.shields.io/badge/stack-React%20%2F%20Next.js-61DAFB.svg)](#호환-스택)
 
@@ -114,53 +114,56 @@ done
 
 사용자는 `/front-agent`만 사용한다. 아래는 front-agent가 내부적으로 자동 호출하는 도구 목록이다.
 
-| 도구 | 역할 |
-|------|------|
-| `plan-feature` | 구현 플랜 생성 |
-| `execute-feature` | 승인된 플랜 실행 |
-| `implement-figma` | Figma → 코드 + 반응형 |
-| `match-style` | Figma 없이 기존 스타일 매칭 |
-| `pixel-check` | 구현 결과 vs 디자인 비교 |
-| `tdd` | TDD 사이클: RED → GREEN → REFACTOR |
-| `code-review` | 코드 품질 리뷰 |
-| `a11y-check` | 접근성 검사 |
-| `refactor-scan` | 반복 패턴 탐지 |
-| `component-audit` | 컴포넌트 재사용 감사 |
-| `save-knowledge` / `search-knowledge` | 지식 저장 및 검색 |
-| `git-branch` / `git-commit` / `git-pr` / `git-issue` | Git 자동화 |
-| `setup` | 프로젝트 초기화 (Lazy — 자동 실행) |
+| 도구 | 역할 | 호출 시점 |
+|------|------|----------|
+| `search-knowledge` | 관련 패턴/컴포넌트/결정사항 로드 | **모든 워크플로우 Step 0** |
+| `tdd` | RED→GREEN→REFACTOR TDD 사이클 전담 | 기능 구현 / 리팩토링 |
+| `implement-figma` | Figma → 코드 + 반응형 | Figma 구현 |
+| `match-style` | Figma 없이 기존 스타일 매칭 | UI 구현 |
+| `pixel-check` | 구현 결과 vs 디자인 비교 | Figma 구현 후 |
+| `a11y-check` | 접근성 검사 | UI 구현 후 |
+| `code-review` | 코드 품질 리뷰 | 모든 구현 후 |
+| `refactor-scan` | 반복 패턴 탐지 | 리팩토링 |
+| `component-audit` | 컴포넌트 재사용 감사 | UI/기능 구현 전 |
+| `save-knowledge` | 지식 저장 | 작업 완료 후 |
+| `git-branch` / `git-commit` / `git-pr` / `git-issue` | Git 자동화 | 구현 완료 후 |
 
 ---
 
 ## 워크플로우
 
+> **모든 워크플로우 공통**: Step 0으로 `search-knowledge`를 먼저 실행해 관련 패턴/컴포넌트/결정사항을 로드한다.
+
 ### Figma 구현
 
 ```
-component-auditor → ui-builder (Figma MCP + 반응형) → pixel-check → a11y-check → reviewer
+search-knowledge → component-auditor → ui-builder (Figma MCP + 반응형)
+→ pixel-check → a11y-check → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### 기능 구현
 
 ```
-component-auditor → developer (테스트 + 구현) → api-integrator → test-runner → reviewer
+search-knowledge → component-auditor → tdd (RED→GREEN→REFACTOR)
+→ api-integrator → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### 디자인 없는 UI
 
 ```
-component-auditor → ui-builder (기존 스타일 매칭) → a11y-check → reviewer
+search-knowledge → component-auditor → ui-builder (기존 스타일 매칭)
+→ a11y-check → reviewer
 → git-branch → git-commit → git-pr
 ```
 
 ### 리팩토링
 
 ```
-refactor-architect (패턴 탐지 → plan.md) → 사용자 승인
-→ component-auditor → implementer → test-runner → reviewer
-→ git-branch → git-commit → git-pr
+search-knowledge → refactor-architect (패턴 탐지 → plan.md) → 사용자 승인
+→ component-auditor → tdd (구현 + 테스트 검증)
+→ reviewer → git-branch(refactor/) → git-commit → git-pr
 ```
 
 ---
@@ -254,9 +257,38 @@ knowledge/
 
 ---
 
+## 스킬 최적화 기록
+
+### v2 → v3: 스킬 구조 재설계 (18개 → 14개)
+
+#### 삭제된 스킬 (구형 워크플로우 잔재)
+
+| 스킬 | 삭제 이유 |
+|------|----------|
+| `setup` | `/front-agent` lazy setup이 완전히 대체. 사용자가 직접 호출할 필요 없음 |
+| `plan-feature` | `/front-agent`가 plan.md를 직접 생성하는 구조로 변경되어 불필요 |
+| `execute-feature` | `/front-agent`가 오케스트레이션 전담으로 변경되어 불필요 |
+| `developer` (에이전트) | `tdd` 스킬로 역할 이전. test-writer + implementer 통합이었지만 RED→GREEN→REFACTOR 구조화가 부족했음 |
+
+#### 연결된 스킬 (있었지만 워크플로우에 미연결 상태였음)
+
+| 스킬 | 기존 문제 | 수정 내용 |
+|------|----------|----------|
+| `tdd` | `developer` 에이전트 내부에서 비구조적으로 TDD를 수행. RED→GREEN→REFACTOR 각 단계 명시 없음 | 기능 구현 / 리팩토링 워크플로우에서 `developer` 대신 `tdd` 스킬 직접 호출로 변경 |
+| `search-knowledge` | 워크플로우 어디에도 없어 기존 패턴/컴포넌트/결정사항이 구현 시작 전에 로드되지 않음 | **모든 워크플로우 Step 0**으로 추가. haiku 모델로 최소 토큰 소비 |
+
+#### 최적화 효과
+
+- **tdd 연결**: 기능 구현 시 RED(테스트 작성 → 실패 확인) → GREEN(최소 구현 → 통과) → REFACTOR(코드 정리 → 재검증) 단계가 명시적으로 실행됨. 이전엔 단계 생략 가능성 있었음
+- **search-knowledge Step 0**: 구현 전에 이미 존재하는 유사 컴포넌트, 이전 결정사항, 알려진 이슈를 먼저 확보. 중복 구현 방지 + 일관성 향상. haiku 모델 사용으로 토큰 오버헤드 최소화
+- **스킬 수 감소**: 18개 → 14개. 각 스킬이 워크플로우에서 명확한 호출 시점을 가짐
+
+---
+
 ## 고도화 방향
 
 - [x] **Wisdom Hub** — `~/.front-agent/wisdom/` 전역 지식 허브, summary 20줄 고정으로 토큰 최소화
+- [x] **스킬 최적화** — 미연결 스킬(tdd, search-knowledge) 워크플로우 통합, 구형 스킬(setup, plan-feature, execute-feature) 제거
 - [ ] **Obsidian 연동** — Wisdom Hub를 Obsidian vault로 교체, 그래프 뷰·wikilink 추적성 확보
 - [ ] **Codex CLI 통합** — 독립 adversarial 코드 리뷰로 self-review 편향 제거
 - [ ] **Lighthouse CI 연동** — 성능 지표 자동 검사
