@@ -1,60 +1,59 @@
 # Global Constraints
 
-> **온디맨드 로딩 원칙**: 이 파일 전체를 모든 에이전트에 주지 않는다.
-> 각 에이전트는 자신의 역할에 해당하는 섹션 태그만 받는다.
-> 
-> | 섹션 태그 | 로드 대상 에이전트 |
-> |----------|-----------------|
+> **On-demand loading rule**: Do not pass this entire file to every agent.
+> Each agent receives only the section tags relevant to its role.
+>
+> | Section tag | Target agents |
+> |-------------|---------------|
 > | `#code-rules` | developer, ui-builder, api-integrator |
 > | `#filesystem` | developer, ui-builder, api-integrator |
 > | `#completion` | developer, ui-builder, api-integrator, test-runner |
 > | `#review` | reviewer |
 > | `#failure-patterns` | reviewer, test-runner |
 >
-> **GC 규칙**: 이 파일이 50줄을 초과하면 `#failure-patterns` 섹션에서
-> 90일 이상 된 항목을 삭제하고, 유사 규칙은 하나로 병합한다.
+> **GC rule**: If this file exceeds 50 lines, remove items older than 90 days from `#failure-patterns` and merge similar rules.
 
 ---
 
 ## #code-rules
 
-- 새 라이브러리/패키지 도입 금지 — 기존 package.json에 있는 것만 사용
-- 외부 API 직접 호출 금지 — 프로젝트 내부 래퍼/서비스 레이어 통해서만
-- `any` 타입 사용 금지 — 모든 변수/함수에 명시적 TypeScript 타입 필수
-- inline style 금지 — Tailwind 클래스 또는 CSS 모듈 사용
-- `console.log` 프로덕션 코드에 남기지 않기
-- YAGNI: 명시적으로 요청된 것만 구현. 추측 기능 추가 금지
+- Do not introduce new libraries or packages. Use only what already exists in `package.json`
+- Do not call external APIs directly. Go through the project's internal wrappers or service layer
+- Do not use the `any` type. Require explicit TypeScript types for all variables and functions
+- Do not use inline styles. Use Tailwind classes or CSS modules
+- Do not leave `console.log` in production code
+- YAGNI: implement only what was explicitly requested. Do not add speculative features
 
 ---
 
 ## #filesystem
 
-- `src/` — 읽기·쓰기 가능
-- `config/`, `.env*` — 읽기만 가능, 수정 금지
-- `node_modules/` — 접근 금지
-- 요청 범위 외 기존 작동 코드 수정 금지
+- `src/`: read and write allowed
+- `config/`, `.env*`: read only, never modify
+- `node_modules/`: do not access
+- Do not modify existing working code outside the requested scope
 
 ---
 
 ## #completion
 
-- 테스트 실행 결과 없이 완료 선언 금지
-- harness_loop MAX_ATTEMPTS(3회) 초과 시 완료 선언 금지 → GitHub 이슈 생성 후 보고
-- 코드만 출력. 설명·요약·"여기서 X를 했습니다" 서술 금지
+- Never declare completion without test execution results
+- If `harness_loop` exceeds `MAX_ATTEMPTS` (3), do not declare completion. Create a GitHub issue and report the failure
+- Output code only. Do not include explanations, summaries, or "I did X" narration
 
 ---
 
 ## #review
 
-- reviewer PASS 없이 git-commit 진행 금지
-- FAIL 판정 시 반복 가능한 패턴이면 `#failure-patterns` 섹션에 규칙 추가
-- 일회성 실수(오타, 특수 상황)는 패턴으로 기록하지 않음
+- Do not proceed to `git-commit` without reviewer PASS
+- If the reviewer returns FAIL and the issue is a repeatable pattern, add a rule to `#failure-patterns`
+- Do not record one-off mistakes, such as typos or file-specific edge cases, as patterns
 
 ---
 
 ## #failure-patterns
 
-> AI가 실수할 때마다 reviewer 또는 test-runner가 여기에 자동 추가.
-> 형식: `- [YYYY-MM-DD] [패턴 설명] — [구체적 금지 규칙]`
+> Reviewer or test-runner appends entries here whenever the AI makes a repeatable mistake.
+> Format: `- [YYYY-MM-DD] [pattern description] - [specific prohibition rule]`
 
-_아직 기록된 실패 패턴 없음._
+_No recorded failure patterns yet._
