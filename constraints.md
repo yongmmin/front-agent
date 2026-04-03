@@ -49,6 +49,7 @@
 ## #review
 
 - Do not proceed to `git-commit` without reviewer PASS
+- Do not proceed to `git-commit` without codex-review PASS or explicit user override
 - If the reviewer returns FAIL and the issue is a repeatable pattern, add a rule to `#failure-patterns`
 - Do not record one-off mistakes, such as typos or file-specific edge cases, as patterns
 

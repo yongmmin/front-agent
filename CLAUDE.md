@@ -35,6 +35,7 @@ If the intent is `ui` and no Figma URL is present, ask for one in the user's lan
 - Do not use legacy agents such as `implementer`, `test-writer`, `figma-builder`, `style-matcher`, or `orchestrator`
 - Never load the full `constraints.md` into every agent
 - Never pass unrelated files, full repo docs, or raw verbose logs to spawned agents
+- `git-commit` requires both `reviewer` PASS and `codex-review` PASS (or explicit user override)
 
 ---
 
