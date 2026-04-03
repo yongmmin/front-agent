@@ -19,7 +19,7 @@ Codex is a different model with no shared context — it will catch different th
 
 ## Model
 
-Use `o3` for adversarial review — it has stronger reasoning for edge case detection than `gpt-5.4`.
+Use `o3` for adversarial review — stronger reasoning for edge case detection than `gpt-5.4`.
 
 ```bash
 codex review --base main -m o3 "..."
@@ -31,10 +31,14 @@ If `o3` is unavailable or rate-limited, fall back to the user's default model (o
 
 ## How To Run
 
-Build the prompt from two sources and pass it as the review instruction:
+Build the review prompt from two sources:
 
-1. **Task goal** — one-line summary from `plan.md` (## Goal section)
-2. **Claude reviewer notes** — non-blocking observations from the `reviewer` PASS output
+| Field | Source | Include |
+|-------|--------|---------|
+| Task goal | `plan.md` → ## Goal | Always — one-line summary |
+| Previous reviewer notes | `reviewer` output → ### Notes | Only when present |
+| `constraints.md` | — | Never — Codex judges independently |
+| Full file contents | — | Never — git diff is sufficient |
 
 ```bash
 codex review --base main -m o3 \
@@ -48,15 +52,6 @@ If the branch is not yet created (uncommitted changes only):
 ```bash
 codex review --uncommitted -m o3 "..."
 ```
-
-### What to include in the prompt
-
-| 항목 | 출처 | 포함 여부 |
-|------|------|----------|
-| 태스크 목표 | `plan.md` → ## Goal | 항상 포함 (1줄 요약) |
-| 이전 리뷰어 비고 | `reviewer` 출력 → ### Notes | 있을 때만 포함 |
-| constraints.md | — | 포함하지 않음 (Codex는 독립 판단) |
-| 구현 파일 원문 | — | 포함하지 않음 (git diff로 충분) |
 
 ---
 
@@ -72,13 +67,41 @@ codex review --uncommitted -m o3 "..."
 
 ---
 
+## On FAIL
+
+Do not auto-fix. Surface the issues to the user with a clear decision prompt:
+
+> "Codex review found blocking issues:
+> 1. [file:line] — [issue]
+>
+> Options:
+> a) Fix — send issues to the implementation agent and re-review
+> b) Override — proceed to git-commit as-is"
+
+### If user chooses Fix
+
+1. Send the codex issue list to the implementation agent (`developer` / `ui-builder`)
+2. Re-run `reviewer`
+3. Re-run `codex-review` (one attempt only)
+4. If still FAIL → create a `git-issue` and report to user — do not retry again
+
+### If user chooses Override
+
+Proceed to `git-commit` as-is. Record the override decision in the handoff block:
+
+```
+- decisions: codex-review FAIL overridden by user — [issue summary]
+```
+
+---
+
 ## Output Format
 
 ```
 ## Codex Review Verdict: PASS / FAIL
 
 ### Blocking Issues (if FAIL)
-1. [file:line] — [issue] → [fix]
+1. [file:line] — [issue] → [suggested fix]
 
 ### Notes (non-blocking)
 - [observation]
@@ -89,7 +112,8 @@ codex review --uncommitted -m o3 "..."
 ## Constraints
 
 - Run only after `reviewer` (opus) has already given PASS
-- Pass only task goal + previous reviewer notes — never pass constraints.md or full file contents
+- Pass only task goal + previous reviewer notes — never pass `constraints.md` or full file contents
 - If `codex` is not installed or not authenticated, skip and warn the orchestrator — do not block the workflow
-- On FAIL: return issues to orchestrator, do not proceed to `git-commit`
-- On PASS: signal orchestrator to proceed to `git-commit`
+- On FAIL: surface to user — do not auto-fix without user approval
+- On PASS or user override: signal orchestrator to proceed to `git-commit`
+- Max one fix-retry cycle per task
