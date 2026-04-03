@@ -2,10 +2,10 @@
 
 # Frontend Co-Pilot
 
-**Claude Code 플러그인 — 7개 에이전트, 14개 스킬, Harness Engineering**
+**Claude Code 플러그인 — 7개 에이전트, 15개 스킬, Harness Engineering**
 
 [![Agents](https://img.shields.io/badge/agents-7-green.svg)](#에이전트)
-[![Skills](https://img.shields.io/badge/skills-14-orange.svg)](#스킬)
+[![Skills](https://img.shields.io/badge/skills-15-orange.svg)](#스킬)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Stack](https://img.shields.io/badge/stack-React%20%2F%20Next.js-61DAFB.svg)](#호환-스택)
 
@@ -85,7 +85,7 @@ chmod +x install.sh && ./install.sh
 ```bash
 for skill in front-agent implement-figma match-style tdd code-review a11y-check \
   pixel-check refactor-scan component-audit save-knowledge search-knowledge \
-  git-branch git-commit git-pr git-issue; do
+  codex-review git-branch git-commit git-pr git-issue; do
   rm -f ~/.claude/skills/$skill
   rm -f ~/.claude/commands/$skill.md
 done
@@ -107,13 +107,15 @@ done
 
 ```
 /front-agent [요청]
+  → Lazy Setup — knowledge/index.md 없으면 자동 초기화 (최초 1회)
   → isAmbiguous 체크 — 모호하면 명확화 질문 (최대 2개)
+  → Figma 체크 — ui 인텐트인데 URL 없으면 요청
   → search-knowledge? (haiku) — 지식 있을 때만 로드
   → component-auditor? (haiku) — UI 작업 시만 실행
   → plan.md 생성 + 사용자 승인
   → [인텐트별 실행: feature / figma / ui / refactor]
   → reviewer (opus) — 코드 품질/TypeScript/보안 리뷰
-  → codex-review — OpenAI o3 독립 adversarial 리뷰 (uncommitted diff 기준)
+  → codex-review — OpenAI o3 독립 adversarial 리뷰 (changed_files 기반 scoped diff)
   → git-branch → git-commit → git-pr
   → save-knowledge? — 학습된 내용 있을 때만 저장
 ```
@@ -122,6 +124,16 @@ done
 
 **이중 게이트**: `reviewer` PASS + `codex-review` PASS 모두 통과해야 `git-commit` 진행.
 `codex-review` FAIL 시 자동 수정 없음 — Fix(재시도 1회) 또는 Override(기록 후 진행) 중 선택.
+
+### 인텐트별 워크플로우
+
+| 인텐트 | 워크플로우 |
+|--------|----------|
+| `feature` | `search-knowledge? → component-auditor? → developer → test-runner → api-integrator? → reviewer → codex-review → git-*` |
+| `figma` | `search-knowledge? → component-auditor → ui-builder → pixel-check → a11y-check → reviewer → codex-review → git-*` |
+| `ui` | `search-knowledge? → component-auditor → ui-builder → a11y-check → reviewer → codex-review → git-*` |
+| `refactor` | `search-knowledge? → refactor-architect → 사용자 재승인 → component-auditor? → developer → test-runner → reviewer → codex-review → git-*` |
+| `review` | `reviewer` |
 
 ---
 
@@ -133,7 +145,7 @@ done
 | `developer` | sonnet | TDD 기반 기능 구현 (test-writer + implementer 통합) |
 | `ui-builder` | sonnet | Figma 또는 기존 스타일 기반 UI 구현 (figma-builder + style-matcher 통합) |
 | `api-integrator` | sonnet | UI-API 연결 + 로딩/에러 상태 처리 |
-| `test-runner` | sonnet | 테스트 실행 + 실패 시 GitHub 이슈 생성 |
+| `test-runner` | sonnet | 테스트 실행 + MAX_ATTEMPTS 초과 시 GitHub 이슈 생성 |
 | `reviewer` | opus | 코드 품질, TypeScript, 보안 리뷰 |
 | `refactor-architect` | opus | 반복 패턴 탐지 + 리팩토링 설계 |
 
@@ -145,16 +157,20 @@ done
 
 | 스킬 | 호출 시점 |
 |------|----------|
-| `search-knowledge` | **모든 워크플로우 Step 0** |
+| `search-knowledge` | Step 0 — 지식 있을 때만 (조건부) |
+| `component-audit` | UI/기능 구현 전 — 조건부 |
 | `tdd` | 기능 구현 / 리팩토링 |
 | `implement-figma` / `match-style` | UI 구현 |
-| `pixel-check` / `a11y-check` | UI 구현 후 검증 |
-| `code-review` | 모든 구현 후 |
+| `pixel-check` | Figma 구현 후 검증 |
+| `a11y-check` | UI 구현 후 검증 |
+| `code-review` | 모든 구현 후 (`reviewer` 에이전트 실행) |
+| `codex-review` | reviewer PASS 후 — OpenAI o3 독립 adversarial 리뷰 |
 | `refactor-scan` | 리팩토링 |
-| `component-audit` | UI/기능 구현 전 |
-| `save-knowledge` | 작업 완료 후 |
-| `codex-review` | reviewer PASS 후 — Codex(OpenAI) 독립 리뷰 |
-| `git-branch` / `git-commit` / `git-pr` / `git-issue` | 구현 완료 후 |
+| `save-knowledge` | 작업 완료 후 — 조건부 |
+| `git-branch` | 구현 완료 후 브랜치 생성 |
+| `git-commit` | reviewer + codex-review 이중 게이트 통과 후 |
+| `git-pr` | 커밋 후 PR 생성 |
+| `git-issue` | harness_loop MAX_ATTEMPTS(3) 초과 시 자동 생성 |
 
 ---
 
@@ -162,7 +178,7 @@ done
 
 > "AI가 실수했을 때, 프롬프트를 고치지 마세요. 마구(harness)를 고치세요."
 
-AI의 실수가 구조적으로 반복 불가능하도록 시스템을 바꾸는 기법. v4에서 적용, v5에서 컨텍스트 최적화 확장.
+AI의 실수가 구조적으로 반복 불가능하도록 시스템을 바꾸는 기법. v4에서 적용, v5에서 컨텍스트 최적화 확장, v6에서 이중 게이트 추가.
 
 | 구성 요소 | 파일 | 역할 |
 |----------|------|------|
@@ -174,8 +190,8 @@ AI의 실수가 구조적으로 반복 불가능하도록 시스템을 바꾸는
 | **실패 → 규칙 루프** | `agents/reviewer.md`, `agents/test-runner.md` | 반복 실패 패턴을 `constraints.md`에 자동 기록 |
 | **Skip Rules** | `CLAUDE.md` | 불필요한 에이전트 호출 조건부 스킵 |
 | **Compact Handoff** | `CLAUDE.md` | 에이전트 간 전달 컨텍스트를 5-bullet 구조체로 제한 |
-| **이중 게이트** | `skills/codex-review/SKILL.md` | `reviewer` PASS + `codex-review` PASS 모두 통과해야 commit 허용 |
-| **codex-review** | `skills/codex-review/SKILL.md` | OpenAI o3로 독립 adversarial 리뷰 — uncommitted diff만 검토, git repo 없으면 graceful skip |
+| **이중 게이트** | `constraints.md` `#review`, `CLAUDE.md` | `reviewer` PASS + `codex-review` PASS 모두 통과해야 commit 허용 |
+| **codex-review** | `skills/codex-review/SKILL.md` | OpenAI o3 독립 adversarial 리뷰 — `changed_files` 기반 scoped diff, git repo 없으면 graceful skip |
 
 ### constraints.md 온디맨드 구조
 
@@ -246,7 +262,7 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 
 ### v6.1: codex-review 범위 수정 (hot-fix)
 
-- **`changed_files` 기반 scoped diff** — `--uncommitted`/`--base main` 대신 핸드오프의 `changed_files`로 `git diff HEAD -- <files>` 생성 후 codex에 직접 전달. 다른 작업의 미커밋 변경사항을 포함하지 않음
+- **`changed_files` 기반 scoped diff** — `--uncommitted`/`--base main` 대신 핸드오프의 `changed_files`로 `git diff HEAD -- <files>` 생성 후 codex에 직접 전달. 다른 작업의 미커밋 변경사항 포함 안 함
 - **git repo 없음 또는 빈 diff → graceful skip** — 워크플로우 블록 없이 warning만 출력
 - **중복 model 섹션 제거** — SKILL.md 구버전 `--base main` 예시 정리
 
@@ -288,16 +304,14 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 
 **완료**
 - [x] Wisdom Hub — 전역 지식 허브, summary 20줄 고정
-- [x] 스킬 최적화 — 14개로 통합, 워크플로우 연결
+- [x] 스킬 최적화 — 15개로 통합, 워크플로우 연결
 - [x] Harness Engineering v4 — PostToolUse, harness_loop, constraints.md 등 6개 구성 요소
 - [x] **도구 경계 하드 강제** — .env* 하드 차단 (settings.json Deny) + config 파일 검토 요청 (PreToolUse 훅) + install.sh 자동 적용
 - [x] **런타임 컨텍스트 최적화 v5** — CLAUDE.md 경량화, Skip Rules, Compact Handoff, 레거시 에이전트 정리
-- [x] **Codex adversarial review** — `codex-review` 스킬, reviewer PASS 후 OpenAI 독립 검토
+- [x] **Codex adversarial review v6** — `codex-review` 스킬, reviewer PASS 후 OpenAI o3 독립 검토, changed_files scoped diff
 
 **예정**
 - [ ] **구조 테스트** — 의존성 규칙을 실제 테스트 코드로 강제
-- [ ] **Obsidian 연동** — Wisdom Hub를 Obsidian vault로 교체
-- [ ] **Lighthouse CI 연동** — 성능 지표 자동 검사
 
 ---
 
