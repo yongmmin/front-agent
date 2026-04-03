@@ -28,18 +28,34 @@ Build the review prompt from two sources:
 | `constraints.md` | — | Never — Codex judges independently |
 | Full file contents | — | Never — git diff is sufficient |
 
-**Important**: `codex-review` always runs before `git-branch` / `git-commit`, so changes are always uncommitted at this point. Always use `--uncommitted`:
+**Scoped diff — only the current task's files**
+
+`--uncommitted` and `--base main` both review ALL changes in the repo, not just the current task. Instead, generate a diff scoped to `changed_files` from the handoff and pass it directly to codex:
 
 ```bash
-codex review --uncommitted -m o3 \
-  "Task: [plan.md Goal in one line]
+# 1. Generate diff for only the files changed in this task
+DIFF=$(git diff HEAD -- src/features/login/LoginForm.tsx src/features/login/LoginForm.test.tsx)
+
+# 2. Pass scoped diff inline to codex
+codex -m o3 "
+Task: [plan.md Goal in one line]
 Previous reviewer (Claude opus) PASS notes: [reviewer Notes section, or 'none']
-Now review independently. Be adversarial. Focus on: correctness, security, type safety, and edge cases. Look for what the previous reviewer missed."
+
+Files changed in this task:
+- src/features/login/LoginForm.tsx
+- src/features/login/LoginForm.test.tsx
+
+Diff:
+\`\`\`diff
+$DIFF
+\`\`\`
+
+Review independently. Be adversarial. Focus on: correctness, security, type safety, and edge cases. Look for what the previous reviewer missed."
 ```
 
-If `o3` is unavailable or rate-limited, fall back to the user's default model (omit `-m`).
+If `o3` is unavailable or rate-limited, omit `-m` to fall back to the user's default model.
 
-**No git repository**: If the working directory is not a git repo, skip `codex-review` and warn the orchestrator — do not block the workflow.
+**No git repository or empty diff**: If the working directory is not a git repo, or `changed_files` is empty, skip `codex-review` and warn the orchestrator — do not block the workflow.
 
 ---
 
@@ -100,8 +116,8 @@ Proceed to `git-commit` as-is. Record the override decision in the handoff block
 ## Constraints
 
 - Run only after `reviewer` (opus) has already given PASS
-- Always use `--uncommitted` — codex-review runs before git-branch/git-commit, so changes are always uncommitted
-- Pass only task goal + previous reviewer notes — never pass `constraints.md` or full file contents
+- Always scope diff to `changed_files` from the handoff — never use `--uncommitted` or `--base main` (those include unrelated changes)
+- Pass only task goal + previous reviewer notes + scoped diff — never pass `constraints.md` or full file contents
 - If `codex` is not installed, not authenticated, or the working directory is not a git repo: skip and warn the orchestrator — do not block the workflow
 - On FAIL: surface to user — do not auto-fix without user approval
 - On PASS or user override: signal orchestrator to proceed to `git-commit`

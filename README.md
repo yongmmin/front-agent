@@ -246,8 +246,8 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 
 ### v6.1: codex-review 범위 수정 (hot-fix)
 
-- **`--uncommitted` 강제** — `codex-review`는 항상 `git-branch` 이전에 실행되므로 변경사항이 uncommitted 상태. `--base main` 대신 `--uncommitted` 사용으로 현재 작업 diff만 검토
-- **git repo 없음 → graceful skip** — git 저장소가 없는 환경에서도 워크플로우 블록 없이 warning만 출력
+- **`changed_files` 기반 scoped diff** — `--uncommitted`/`--base main` 대신 핸드오프의 `changed_files`로 `git diff HEAD -- <files>` 생성 후 codex에 직접 전달. 다른 작업의 미커밋 변경사항을 포함하지 않음
+- **git repo 없음 또는 빈 diff → graceful skip** — 워크플로우 블록 없이 warning만 출력
 - **중복 model 섹션 제거** — SKILL.md 구버전 `--base main` 예시 정리
 
 ### v5 → v6: Codex Adversarial Review
