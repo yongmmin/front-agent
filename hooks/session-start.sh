@@ -1,40 +1,36 @@
 #!/bin/bash
 # session-start.sh
-# 세션 시작 시 wisdom summary(최대 20줄)만 로드. 상세 파일은 온디맨드.
+# Load only compact summary data at session start. Full project knowledge is on-demand.
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 KNOWLEDGE_INDEX="$PLUGIN_DIR/knowledge/index.md"
 WISDOM_DIR="$HOME/.front-agent/wisdom"
 WISDOM_SUMMARY="$WISDOM_DIR/summary.md"
+MAX_WISDOM_LINES=10
 
-# 1. 전역 wisdom summary 로드 (토큰 최소화 — 20줄 제한)
 if [ -f "$WISDOM_SUMMARY" ]; then
   LINE_COUNT=$(wc -l < "$WISDOM_SUMMARY")
   if [ "$LINE_COUNT" -gt 20 ]; then
-    echo "⚠️  wisdom/summary.md가 20줄을 초과합니다 ($LINE_COUNT줄). 오래된 항목을 정리하세요."
+    echo "Warning: wisdom/summary.md exceeds 20 lines ($LINE_COUNT). Trim old entries."
   fi
-  echo "=== Wisdom (요약) ==="
-  head -20 "$WISDOM_SUMMARY"
-  echo "=== End Wisdom ==="
+  echo "=== Wisdom Summary ==="
+  head -n "$MAX_WISDOM_LINES" "$WISDOM_SUMMARY"
+  echo "=== End Wisdom Summary ==="
   echo ""
 fi
 
-# 2. 프로젝트 knowledge/index.md 로드
 if [ ! -f "$KNOWLEDGE_INDEX" ]; then
-  echo "⚠️  knowledge/index.md 없음. 첫 요청 시 자동 초기화됩니다."
+  echo "Project knowledge is not initialized yet. It will be created on first use."
   exit 0
 fi
 
 LINE_COUNT=$(wc -l < "$KNOWLEDGE_INDEX")
 if [ "$LINE_COUNT" -gt 300 ]; then
-  echo "⚠️  knowledge/index.md가 300줄을 초과합니다 ($LINE_COUNT줄). 도메인 파일로 분리하세요."
+  echo "Warning: knowledge/index.md exceeds 300 lines ($LINE_COUNT). Split it into domain files."
 fi
 
-echo "=== 프로젝트 Knowledge ==="
-echo "📚 knowledge/index.md ($LINE_COUNT줄)"
-echo ""
-cat "$KNOWLEDGE_INDEX"
-echo ""
-echo "=== End Knowledge ==="
-echo ""
-echo "💡 상세 wisdom: ~/.front-agent/wisdom/learnings.md | decisions.md | issues.md"
+echo "=== Project Knowledge Summary ==="
+echo "- Source: knowledge/index.md ($LINE_COUNT lines)"
+grep -E '^- \*\*(Stack|Git|Design)\*\*:' "$KNOWLEDGE_INDEX" | head -n 3
+echo "- Details: load on demand through search-knowledge"
+echo "=== End Project Knowledge Summary ==="

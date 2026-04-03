@@ -107,14 +107,16 @@ done
 ```
 /front-agent [요청]
   → isAmbiguous 체크 — 모호하면 명확화 질문 (최대 2개)
-  → search-knowledge (haiku) — 관련 패턴/컴포넌트/결정사항 로드
-  → component-auditor (haiku) — 재사용 가능 컴포넌트 탐색
+  → search-knowledge? (haiku) — 지식 있을 때만 로드
+  → component-auditor? (haiku) — UI 작업 시만 실행
   → plan.md 생성 + 사용자 승인
   → [인텐트별 실행: feature / figma / ui / refactor]
   → reviewer (opus) — 코드 품질/TypeScript/보안 리뷰
   → git-branch → git-commit → git-pr
-  → save-knowledge
+  → save-knowledge? — 학습된 내용 있을 때만 저장
 ```
+
+`?` = 조건부 실행. Skip Rules에 해당하면 건너뜀.
 
 ---
 
@@ -154,16 +156,18 @@ done
 
 > "AI가 실수했을 때, 프롬프트를 고치지 마세요. 마구(harness)를 고치세요."
 
-AI의 실수가 구조적으로 반복 불가능하도록 시스템을 바꾸는 기법. v4에서 적용됨.
+AI의 실수가 구조적으로 반복 불가능하도록 시스템을 바꾸는 기법. v4에서 적용, v5에서 컨텍스트 최적화 확장.
 
 | 구성 요소 | 파일 | 역할 |
 |----------|------|------|
-| **PostToolUse 훅** | `hooks/post-tool-use.sh` | `.ts/.tsx` 저장 시 tsc + eslint 자동 실행, 에러 즉시 피드백 |
+| **PostToolUse 훅** | `hooks/post-tool-use.sh` | `.ts/.tsx` 저장 시 tsc + eslint 자동 실행, 에러 요약 출력 |
 | **harness_loop** | `skills/front-agent/SKILL.md` | 테스트 실패 → 에러 피드백 → 재시도 (MAX 3회), 초과 시 GitHub 이슈 생성 |
 | **isAmbiguous** | `skills/front-agent/SKILL.md` | plan 전 모호한 요청 감지 → 명확화 질문 강제 |
 | **constraints.md** | `constraints.md` | 5개 섹션 태그(`#code-rules` 등), 에이전트별 온디맨드 로딩 |
 | **Output constraints** | `agents/*.md` | 에이전트 "코드만 출력" 강제, 설명·요약 금지 |
 | **실패 → 규칙 루프** | `agents/reviewer.md`, `agents/test-runner.md` | 반복 실패 패턴을 `constraints.md`에 자동 기록 |
+| **Skip Rules** | `CLAUDE.md` | 불필요한 에이전트 호출 조건부 스킵 |
+| **Compact Handoff** | `CLAUDE.md` | 에이전트 간 전달 컨텍스트를 5-bullet 구조체로 제한 |
 
 ### constraints.md 온디맨드 구조
 
@@ -175,6 +179,32 @@ AI의 실수가 구조적으로 반복 불가능하도록 시스템을 바꾸는
 | test-runner | `#completion` + `#failure-patterns` |
 | reviewer | `#review` + `#failure-patterns` |
 | component-auditor | 없음 |
+
+### Skip Rules
+
+불필요한 에이전트 호출을 건너뛰는 조건:
+
+| 스킵 대상 | 조건 |
+|----------|------|
+| `search-knowledge` | 저장된 지식이 없거나 현재 태스크와 무관 |
+| `component-auditor` | 리뷰 전용 태스크 또는 UI 변경 없는 순수 API 연결 |
+| `api-integrator` | UI 데이터 흐름 변경이 없는 경우 |
+| `save-knowledge` | 재사용 가능한 패턴/결정/이슈를 학습하지 않은 경우 |
+
+### Compact Handoff 포맷
+
+에이전트 간 전달 시 자유형 산문 대신 구조화된 블록 사용:
+
+```markdown
+## Handoff
+- changed_files: src/features/cart/Cart.tsx
+- reusable_components: Button, Card
+- decisions: 기존 ProductCard 레이아웃 유지
+- blockers: cart.spec.ts 실패 중
+- test_status: failed:npm run test
+```
+
+규칙: 최대 5줄, 줄당 1개 항목, 빈 필드 생략.
 
 ---
 
@@ -206,6 +236,16 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 
 ## 변경 이력
 
+### v4 → v5: 런타임 컨텍스트 최적화
+
+- **CLAUDE.md 경량화** — 267줄 → 95줄. 워크플로우 반복 제거, 런타임 가드레일만 유지. 매 turn 토큰 절감
+- **Skip Rules 추가** — `search-knowledge`, `component-auditor`, `api-integrator`, `save-knowledge` 조건부 스킵
+- **Compact Handoff 포맷** — 에이전트 간 자유형 prose 대신 5-bullet 구조체 강제
+- **런타임/문서 분리** — `README.md`는 실행 중 로드 차단, `SKILL.md`를 canonical spec으로 위임
+- **레거시 에이전트 삭제** — `figma-builder`, `style-matcher`, `implementer`, `test-writer`, `orchestrator` 제거
+- **PostToolUse 출력 압축** — 긴 tsc/eslint 로그 대신 에러 요약만 출력
+- **session-start 훅 최적화** — 전체 knowledge 파일 대신 요약만 로드
+
 ### v3 → v4: Harness Engineering 적용
 
 - **PostToolUse 훅** 추가 — 저장 즉시 자동 검증
@@ -229,9 +269,10 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 - [x] 스킬 최적화 — 14개로 통합, 워크플로우 연결
 - [x] Harness Engineering v4 — PostToolUse, harness_loop, constraints.md 등 6개 구성 요소
 - [x] **도구 경계 하드 강제** — .env* 하드 차단 (settings.json Deny) + config 파일 검토 요청 (PreToolUse 훅) + install.sh 자동 적용
+- [x] **런타임 컨텍스트 최적화 v5** — CLAUDE.md 경량화, Skip Rules, Compact Handoff, 레거시 에이전트 정리
 
 **예정**
-- [ ] **Codex adversarial review** — 다른 AI로 독립 검토, self-review 편향 제거
+- [ ] ** Codex adversarial review** —다른 AI로 독립 검토, self-review 편향 제거
 - [ ] **구조 테스트** — 의존성 규칙을 실제 테스트 코드로 강제
 - [ ] **Obsidian 연동** — Wisdom Hub를 Obsidian vault로 교체
 - [ ] **Lighthouse CI 연동** — 성능 지표 자동 검사

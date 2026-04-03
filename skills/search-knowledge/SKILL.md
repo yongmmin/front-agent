@@ -1,50 +1,65 @@
 ---
 name: search-knowledge
-description: Search the knowledge base and global wisdom hub for relevant information
+description: Search project and global knowledge sources using compact, on-demand retrieval
 ---
 
 # Skill: search-knowledge
 
-**Trigger**: `/search-knowledge [query]` or auto-called by agents needing context
-**Purpose**: Search project `knowledge/` and global wisdom hub (`~/.front-agent/wisdom/`) for relevant information.
+**Trigger**: `/search-knowledge [query]` or auto-called by `front-agent`
+**Purpose**: Load only the smallest useful knowledge slice for the current task.
 
 ---
 
-## Search Priority
+## Search Order
 
-1. `~/.front-agent/wisdom/summary.md` — always load (20 lines, minimal tokens)
-2. `knowledge/index.md` — project context
-3. Load detail files on demand based on query:
-   - Learnings → `~/.front-agent/wisdom/learnings.md`
-   - Decisions → `~/.front-agent/wisdom/decisions.md`
-   - Issues → `~/.front-agent/wisdom/issues.md`
-   - Components → `knowledge/components.md`
-   - Patterns → `knowledge/patterns.md`
-   - Design → `knowledge/design-system.md`
+1. `~/.front-agent/wisdom/summary.md`
+2. `knowledge/index.md`
+3. Detail files only when needed:
+   - `~/.front-agent/wisdom/learnings.md`
+   - `~/.front-agent/wisdom/decisions.md`
+   - `~/.front-agent/wisdom/issues.md`
+   - `knowledge/components.md`
+   - `knowledge/patterns.md`
+   - `knowledge/design-system.md`
 
-**Core principle**: Load only what is needed. Do not load all files at once.
+---
+
+## Fast-Skip Rules
+
+- If summaries contain only placeholders or no relevant matches, stop early
+- Do not open detail files unless the summary/index suggests a relevant hit
+- Do not load unrelated domains "just in case"
 
 ---
 
 ## Output Format
 
-```
+Return compact bullets only.
+
+```markdown
 ## Knowledge Search: "[query]"
 
-### Wisdom (global)
-[relevant entries from summary.md]
+### Global
+- [max 3 one-line bullets]
 
-### Project Knowledge
-[relevant entries from knowledge/index.md]
+### Project
+- [max 3 one-line bullets]
 
-### Detail (on-demand loaded)
-[excerpts from relevant detail files]
+### Details
+- [max 3 one-line bullets]
 ```
+
+Rules:
+
+- Max 3 bullets per section
+- One line per bullet
+- Prefer summaries over long excerpts
+- If nothing is relevant, say `No relevant entries found`
 
 ---
 
 ## Constraints
 
-- Use haiku model (read-only, no modifications)
-- Do not load files unrelated to the query
-- If no results found, explicitly state "No relevant entries found"
+- Use `haiku`
+- Read-only
+- Keep results compact enough to paste directly into the next agent prompt

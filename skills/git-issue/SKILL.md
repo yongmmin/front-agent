@@ -1,84 +1,25 @@
 ---
 name: git-issue
-description: Create a GitHub issue to track bugs, failed tests, or new tasks
+description: Create an issue for failed tests or tracked follow-up work
 ---
 
 # Skill: git-issue
 
-**Trigger**: called automatically on test failure, or manually `/git-issue [description]`
-**Purpose**: Create a GitHub issue to track bugs, failed tests, or new tasks.
+**Trigger**: auto-called on test failure or manually via `/git-issue [description]`
+**Purpose**: Record failures and follow-up work with enough detail to reproduce.
 
 ---
 
-## Activation Scenarios
+## Required Content
 
-1. **Auto**: test-runner detects failing tests
-2. **Auto**: new feature work starts (task tracking)
-3. **Manual**: `/git-issue [description]`
-
----
-
-## Workflow
-
-1. Gather issue content based on trigger type
-2. Create issue via `gh issue create`
-3. Return issue number to orchestrator (for PR linking)
-
----
-
-## Issue Templates
-
-### Test Failure Issue
-```markdown
-**Title**: [TEST FAIL] [test name]
-
-**Description**:
-## Failed Test
-- File: [filename]
-- Test: [test name]
-- Branch: [branch name]
-
-## Error
-\`\`\`
-[full error message]
-\`\`\`
-
-## Reproduce
-\`\`\`bash
-[test command]
-\`\`\`
-
-## Context
-[what was being implemented]
-```
-
-### Feature Task Issue
-```markdown
-**Title**: [feat] [feature name]
-
-**Description**:
-## Goal
-[what needs to be done]
-
-## Acceptance Criteria
-- [ ] [criterion 1]
-- [ ] [criterion 2]
-```
-
----
-
-## gh CLI Command
-
-```bash
-gh issue create \
-  --title "[title]" \
-  --body "[body]" \
-  --label "[bug|enhancement|test-failure]"
-```
+- What failed
+- Reproduction command
+- Current branch or task context
+- Short error summary
 
 ---
 
 ## Constraints
 
-- Always include reproduction steps for bug/test-failure issues
-- Return issue number after creation for PR linking
+- Always include reproduction steps for test failures
+- Return the issue identifier for later PR linking

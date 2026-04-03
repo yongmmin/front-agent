@@ -1,266 +1,212 @@
 ---
 name: front-agent
-description: Single entry point for all frontend tasks. Natural language → auto plan → execute.
+description: Single entry point for frontend work. Classify intent, create a plan, and run the minimal agent workflow.
 ---
 
 # Skill: front-agent
 
 **Trigger**: `/front-agent [request]`
-**Purpose**: One command handles setup → intent detection → Figma URL check → plan → execution automatically.
+**Purpose**: Handle setup, intent detection, planning, execution, and verification with minimal context overhead.
 
 ---
 
-## Overall Flow
+## Canonical Rules
 
-```
-/front-agent "create a login form"
-       ↓
-1. Auto-detect project (lazy setup)
-2. Classify intent
-3. If UI task → ask "Do you have a Figma URL?"
-4. Generate plan.md and wait for user approval
-5. After approval → run agent orchestration
-```
+- This file is the canonical runtime workflow
+- `README.md` is documentation only and should not be loaded during execution
+- `front-agent` never implements directly
+- Use only active merged agents: `component-auditor`, `developer`, `ui-builder`, `api-integrator`, `test-runner`, `reviewer`, `refactor-architect`
+- Do not use legacy agents: `implementer`, `test-writer`, `figma-builder`, `style-matcher`, `orchestrator`
 
 ---
 
-## Step 1: Auto-Detect Project (Lazy Setup)
+## Request Gate
 
-If `knowledge/index.md` is missing, run setup automatically. Do not ask the user for `/setup`.
+### 1. Lazy Setup
 
-```
-- Read package.json → detect stack (Next.js, React, TypeScript, Tailwind, etc.)
-- Initialize knowledge/ directory
-- Run component-auditor (haiku) → create knowledge/components.md
-- Check gh auth status, git remote -v
-```
+If `knowledge/index.md` is missing, initialize project knowledge automatically.
+Do not ask the user to run `/setup`.
 
-Skip this step if setup is already complete.
+### 2. Ambiguity Check
 
----
+Ask a clarification question before planning if any of the following apply:
 
-## Step 1.5: Ambiguity Check (isAmbiguous)
+- The target is unclear
+- API or integration details are missing
+- Scope is overly broad
+- The request mixes multiple major tasks
+- "Optimize" or "improve" does not specify what dimension matters
 
-Before classifying intent, determine if the request is sufficiently clear.
-If any of the following conditions apply, ask a clarifying question before generating plan.
+Rules:
 
-### Ambiguous Request Conditions
-- Target is unclear ("fix the button" — which button?)
-- "Connect it" / "hook it up" without an API spec
-- Scope is excessively broad ("everything", "all", "the whole thing")
-- Technology choice is vague ("optimize it", "improve it" — what? performance? code quality?)
-- Multiple requirements mixed in one request
+- Ask at most 2 questions
+- Ask only for missing information that blocks planning
 
-### Clarification Question Format
-When a request is ambiguous, ask in this format and proceed to Step 2 after receiving the answer.
+### 3. Intent Classification
 
-> "[What part] is unclear. Please clarify the following:
-> 1. [specific question 1]
-> 2. [specific question 2 (if needed)]"
-
-**Important**: Maximum 2 questions. Skip this step for clear requests.
-
----
-
-## Step 2: Intent Classification
-
-Analyze the request and classify into one of the following:
-
-| Intent | Example Keywords | Workflow |
-|--------|-----------------|----------|
-| `figma` | Contains figma.com URL | Figma implementation |
-| `ui` | Contains Korean UI request terms such as `만들어줘`, `폼`, `버튼`, `페이지`, `화면`, `컴포넌트` | UI implementation (ask for Figma URL) |
+| Intent | Detection rule | Workflow |
+|--------|----------------|----------|
+| `figma` | Contains a `figma.com` URL | Figma implementation |
+| `ui` | Contains Korean UI terms such as `만들어줘`, `폼`, `버튼`, `페이지`, `화면`, `컴포넌트` | UI without design file unless a Figma URL is provided |
 | `feature` | Contains Korean feature terms such as `기능`, `추가`, `연결`, `API`, `로직` | Feature implementation |
 | `refactor` | Contains Korean refactor terms such as `리팩토링`, `정리`, `개선`, `중복` | Refactoring |
 | `review` | Contains Korean review terms such as `리뷰`, `검토`, `확인해줘` | Code review |
 
----
+### 4. Figma Check
 
-## Step 3: Figma URL Check (UI/Figma intent only)
+If intent is `ui` and no Figma URL is present, ask for one in the user's language.
 
-If intent is `ui` or `figma` and no figma.com URL in the request:
+- URL provided -> `figma`
+- No URL -> `ui`
 
-> "Do you have a Figma URL? Paste it if so. If not, say 'no' and I'll match the existing style."
+### 5. Plan Gate
 
-- URL provided → `figma` workflow
-- "No" / no URL → `ui` workflow (style-matcher)
+Create `plan.md`, then wait for explicit user approval before any execution.
 
----
-
-## Step 4: plan.md Generation and Approval
-
-Generate plan.md for the classified intent.
+Use this format:
 
 ```markdown
 # Plan: [task name]
 
 ## Goal
-[What and why]
+[what and why]
 
 ## Intent
-[figma / ui / feature / refactor]
+[figma / ui / feature / refactor / review]
 
-## Figma
-[URL or "none — match existing style"]
-
-## Reusable Components
-- [component] ([file]) — [how to use]
+## Inputs
+- Figma: [URL or none]
+- API: [spec, endpoint, or none]
 
 ## Affected Files
-- [path] — [change description]
+- path/to/file.tsx - [change]
 
 ## Execution Steps
-- Step 1: [agent] — [task]
-- ...
+- Step 1: [agent] - [task]
+- Step 2: [agent] - [task]
 
 ## Branch
-[feat|ui|fix|refactor]/[task-name]
+[feat|fix|ui|refactor]/[task-name]
 
 ## Commit Units
 - [type]: [description]
 ```
 
-After generating plan.md:
-> "Please review plan.md. Shall we proceed?"
-
-When the user approves ("yes", "ok", "go ahead", "proceed", etc.), move to Step 5.
+Ask: `Please review plan.md. Approve it and I will execute.`
 
 ---
 
-## Step 5: Agent Execution by Workflow
+## Context Budget
 
-> **CRITICAL**: The orchestrator never writes code or modifies files directly.
-> All implementation must be handled by spawning subagents via the `Agent` tool.
-> Write/Edit tools are only allowed for plan.md.
+For each agent call, include only:
 
-> **Context Manager Rules**: When spawning each agent, include at the front of the prompt:
-> 1. The relevant constraints sections for that agent (from CLAUDE.md context selection table)
-> 2. plan.md content
-> 3. Previous agent results (if any)
->
-> **NEVER**: include all of constraints.md at once.
-> **NEVER**: include files unrelated to the current task.
+1. The relevant `agents/*.md` file
+2. The relevant `constraints.md` sections
+3. The minimal `plan.md` excerpt needed for that step
+4. A compact handoff block
+5. Only the exact files needed for execution
 
-When calling each agent:
-1. The agent file (`agents/*.md`) content
-2. Only the relevant constraints sections for that agent (from CLAUDE.md context selection table)
-3. plan.md content
-4. Previous agent results (if any)
-— Include only these 4. Nothing more.
+### Compact Handoff Schema
 
-> **Common Step 0 for all workflows**: `search-knowledge (haiku)` — load relevant patterns/components/decisions first
-
-### Figma Implementation
-```
-0. Skill(search-knowledge, model=haiku)  — load relevant knowledge
-1. Agent(component-auditor, model=haiku) — find reusable components
-2. Agent(ui-builder, model=sonnet)       — implement design via Figma MCP + responsive
-3. Agent(ui-builder, model=sonnet)       — pixel-check: compare design vs implementation
-4. Agent(ui-builder, model=sonnet)       — a11y-check: accessibility audit
-5. Agent(reviewer, model=opus)           — code review
-6. Agent(git-branch → git-commit → git-pr)
+```markdown
+## Handoff
+- changed_files: path1, path2
+- reusable_components: Button, Card
+- decisions: keep existing filter sidebar pattern
+- blockers: failing `cart.spec.ts`
+- test_status: not_run | passed:npm run test | failed:npm run test
 ```
 
-### UI Implementation (No Figma)
+Rules:
+
+- Omit empty fields
+- Max 5 bullets
+- One line per bullet
+- No prose summaries
+- Prefer paths, identifiers, and commands
+
+---
+
+## Workflow Selection
+
+### Shared Skip Rules
+
+- Skip `search-knowledge` if stored knowledge is empty or irrelevant
+- Skip `component-auditor` for review-only tasks and pure API wiring with no UI change
+- Skip `api-integrator` unless UI data fetching or mutation behavior changes
+- Skip `save-knowledge` if the task produced no durable learning
+
+### Feature
+
 ```
-0. Skill(search-knowledge, model=haiku)  — load relevant knowledge
-1. Agent(component-auditor, model=haiku) — find reusable components
-2. Agent(ui-builder, model=sonnet)       — implement matching existing style
-3. Agent(ui-builder, model=sonnet)       — a11y-check: accessibility audit
-4. Agent(reviewer, model=opus)           — code review
-5. Agent(git-branch → git-commit → git-pr)
+search-knowledge? -> component-auditor? -> developer
+-> test-runner -> api-integrator? -> reviewer
+-> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
-### Feature Implementation
+### Figma
+
 ```
-0. Skill(search-knowledge, model=haiku)  — load relevant knowledge
-1. Agent(component-auditor, model=haiku) — find reusable components
-2. Skill(tdd, model=sonnet)              — dedicated RED→GREEN→REFACTOR TDD cycle
-3. Agent(api-integrator, model=sonnet)   — API integration (if needed)
-4. Agent(reviewer, model=opus)           — code review
-5. Agent(git-branch → git-commit → git-pr)
+search-knowledge? -> component-auditor -> ui-builder
+-> pixel-check -> a11y-check -> reviewer
+-> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
-### Refactoring
+### UI Without Design
+
 ```
-0. Skill(search-knowledge, model=haiku)  — load relevant knowledge
-1. Agent(refactor-architect, model=opus) — detect patterns → update plan.md
-2. Wait for user re-approval
-3. Agent(component-auditor, model=haiku) — confirm reusable components
-4. Skill(tdd, model=sonnet)              — implement refactor + verify tests
-5. Agent(reviewer, model=opus)           — code review
-6. Agent(git-branch(refactor/) → git-commit → git-pr)
+search-knowledge? -> component-auditor -> ui-builder
+-> a11y-check -> reviewer
+-> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
-### Code Review
+### Refactor
+
 ```
-1. Agent(reviewer, model=opus) → output results
+search-knowledge? -> refactor-architect -> user re-approval
+-> component-auditor? -> developer -> test-runner -> reviewer
+-> git-branch -> git-commit -> git-pr -> save-knowledge?
+```
+
+### Review
+
+```
+reviewer
 ```
 
 ---
 
-## harness_loop: Auto-Correction Loop
+## Harness Loop
 
-> **This is the heart of the harness.** An agent cannot declare completion until tests pass.
+Use the retry loop for `feature`, `ui`, `figma`, and `refactor` implementation steps.
 
-### How It Works
-
-```
+```text
 MAX_ATTEMPTS = 3
-attempt = 0
 
-while attempt < MAX_ATTEMPTS:
-  1. Run implementation agent (developer / ui-builder)
-  2. Verify with test-runner
+run implementation agent
+run test-runner when applicable
 
-  if tests pass:
-    → proceed to reviewer agent
-    → done
-  else:
-    attempt++
-    feed error message back to implementation agent
-    "Please fix the following errors: [error content]"
+if tests fail:
+  retry with only the failing error context
 
-if attempt >= MAX_ATTEMPTS:
-  → auto-create git-issue (title: [HARNESS FAIL] + task name)
-  → report to user and stop
+if attempts exceed MAX_ATTEMPTS:
+  create a git issue
+  record a repeatable failure pattern if appropriate
+  stop and report
 ```
 
-### Error Feedback Format for Agent Retry
+Retry context must contain only:
 
-Context to pass to the implementation agent on retry:
-```
-The previous implementation produced the following errors (attempt {attempt}/3):
+- failing command
+- failing file/test identifier
+- shortest useful error excerpt
 
-[error content]
-
-Fix only the above errors. Do not touch other code.
-```
-
-### Applied Workflows
-
-- **Feature implementation**: run tdd agent → test-runner verification → retry on failure
-- **UI implementation**: run ui-builder → test-runner verification (if tests exist) → retry on failure
-- **Refactoring**: run tdd → test-runner verification → retry on failure
+Never resend the full previous transcript.
 
 ---
 
-## After Completion
+## Completion
 
-- Save learnings from this task with `save-knowledge`
-- Output PR URL
-
----
-
-## Constraints
-
-- **The orchestrator never writes code directly. Violation = immediate stop.**
-- Do not use Write/Edit tools except for plan.md.
-- Include agents/*.md content and current context in each agent prompt.
-- Handle setup automatically. Do not ask the user for `/setup`.
-- Do not start implementation without plan.md.
-- Do not proceed to execution without user approval.
-- Do not declare completion without tests.
-- Do not skip harness_loop and declare completion.
-- Do not skip isAmbiguous check. Always ask when request is ambiguous.
-- If MAX_ATTEMPTS (3) is exceeded, must create git-issue and report to user.
+- Never declare completion without test evidence when tests are applicable
+- Never move to `git-commit` without reviewer PASS
+- Save knowledge only if a reusable pattern, decision, or repeatable issue emerged

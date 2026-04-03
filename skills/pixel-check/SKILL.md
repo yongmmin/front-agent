@@ -1,75 +1,41 @@
 ---
 name: pixel-check
-description: Compare implemented UI against Figma design and flag deviations
+description: Compare implemented UI against Figma and report only meaningful deviations
 ---
 
 # Skill: pixel-check
 
-**Trigger**: `/pixel-check [figma-url]` or auto-called after figma-builder
-**Purpose**: Compare the implemented UI against the Figma design and flag significant deviations.
-
----
-
-## Activation
-
-- Auto: called after figma-builder completes
-- Manual: `/pixel-check [figma-url]`
+**Trigger**: `/pixel-check [figma-url]` or auto-called after `ui-builder`
+**Purpose**: Flag only deviations large enough to matter before review.
 
 ---
 
 ## Workflow
 
+```text
+1. Fetch Figma screenshot
+2. Capture implementation screenshot
+3. Compare layout, spacing, typography, color, and states
+4. Report only blocker-level or meaningful major deviations
 ```
-Step 1: Fetch Figma design screenshot
-  → Use Figma MCP: get_screenshot(fileKey, nodeId)
-
-Step 2: Capture implementation screenshot
-  → Use browser screenshot tool or describe current state
-
-Step 3: Compare
-  → Layout alignment
-  → Spacing and sizing
-  → Typography (font size, weight, line height)
-  → Colors
-  → Component variants and states
-
-Step 4: Report deviations
-  → Critical (must fix before PR): layout broken, wrong colors
-  → Minor (acceptable): 1-2px spacing differences
-```
-
----
-
-## Deviation Severity
-
-| Level | Example | Action |
-|-------|---------|--------|
-| **Critical** | Wrong layout, missing section | Must fix |
-| **Major** | Wrong color, wrong font size | Should fix |
-| **Minor** | 2px spacing diff, subtle shadow | Note only |
 
 ---
 
 ## Output Format
 
-```
+```markdown
 ## Pixel Check Results
 
-### Critical (must fix)
-- [element]: expected [X], got [Y]
+### Blockers
+- [element]: [expected] vs [actual]
 
-### Major (should fix)
-- [element]: expected [X], got [Y]
+### Notes
+- [non-blocking major deviation]
 
-### Minor (noted)
-- [element]: minor spacing difference
-
-Overall: PASS / NEEDS REVISION
+Overall: PASS | NEEDS REVISION
 ```
 
----
+Rules:
 
-## Constraints
-
-- Only flag deviations above minor threshold as blockers
-- Minor differences due to browser rendering are acceptable
+- Omit empty sections
+- Ignore minor browser rendering differences

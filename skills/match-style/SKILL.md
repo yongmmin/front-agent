@@ -1,47 +1,29 @@
 ---
 name: match-style
-description: Implement new UI matching existing product style when no Figma design is available
+description: Implement UI that matches the existing product style without a Figma file
 ---
 
 # Skill: match-style
 
 **Trigger**: `/match-style [description]`
-**Purpose**: Implement new UI without a Figma design, matching the existing product's visual style.
-
----
-
-## Activation
-
-User types: `/match-style [what to build]`
-Use when: No Figma design is available.
+**Purpose**: Build new UI by reusing and extending the product's existing visual language.
 
 ---
 
 ## Workflow
 
-```
-Step 1: component-auditor (haiku)
-  → Find reusable components
-
-Step 2: style-matcher (sonnet)
-  → Scan existing pages/components
-  → Extract design language
-  → Implement matching UI with responsive layout
-
-Step 3: a11y-check (sonnet)
-  → Accessibility verification
-
-Step 4: reviewer (opus)
-  → Code review
-
-Step 5: git-branch → git-commit → git-pr
-  → Branch: ui/[component-name]
+```text
+1. component-auditor
+2. ui-builder
+3. a11y-check
+4. reviewer
+5. git-branch -> git-commit -> git-pr
 ```
 
 ---
 
 ## Constraints
 
-- Must analyze at least 3 existing components before implementing
-- Must include responsive breakpoints
-- Document extracted patterns in code comments
+- Inspect existing components before adding new patterns
+- Keep responsive behavior
+- Do not invent a new design language if one already exists
