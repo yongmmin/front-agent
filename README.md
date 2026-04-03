@@ -39,6 +39,7 @@
 | **Claude Code** | 필수 |
 | **Node.js** | 필수 |
 | **gh CLI** | 필수 (`brew install gh && gh auth login`) |
+| **Codex CLI** | codex-review 사용 시 (`npm install -g @openai/codex && codex login`) |
 | **Figma MCP** | Figma 구현 시 |
 
 ---
@@ -271,8 +272,6 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 - [x] Harness Engineering v4 — PostToolUse, harness_loop, constraints.md 등 6개 구성 요소
 - [x] **도구 경계 하드 강제** — .env* 하드 차단 (settings.json Deny) + config 파일 검토 요청 (PreToolUse 훅) + install.sh 자동 적용
 - [x] **런타임 컨텍스트 최적화 v5** — CLAUDE.md 경량화, Skip Rules, Compact Handoff, 레거시 에이전트 정리
-
-**완료**
 - [x] **Codex adversarial review** — `codex-review` 스킬, reviewer PASS 후 OpenAI 독립 검토
 
 **예정**

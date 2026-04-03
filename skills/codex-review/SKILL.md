@@ -17,17 +17,46 @@ Codex is a different model with no shared context — it will catch different th
 
 ---
 
-## How To Run
+## Model
+
+Use `o3` for adversarial review — it has stronger reasoning for edge case detection than `gpt-5.4`.
 
 ```bash
-codex review --base main "Be adversarial. Focus on: correctness, security, type safety, and edge cases. Look for what the previous reviewer missed."
+codex review --base main -m o3 "..."
+```
+
+If `o3` is unavailable or rate-limited, fall back to the user's default model (omit `-m`).
+
+---
+
+## How To Run
+
+Build the prompt from two sources and pass it as the review instruction:
+
+1. **Task goal** — one-line summary from `plan.md` (## Goal section)
+2. **Claude reviewer notes** — non-blocking observations from the `reviewer` PASS output
+
+```bash
+codex review --base main -m o3 \
+  "Task: [plan.md Goal in one line]
+Previous reviewer (Claude opus) PASS notes: [reviewer Notes section, or 'none']
+Now review independently. Be adversarial. Focus on: correctness, security, type safety, and edge cases. Look for what the previous reviewer missed."
 ```
 
 If the branch is not yet created (uncommitted changes only):
 
 ```bash
-codex review --uncommitted "Be adversarial. Focus on: correctness, security, type safety, and edge cases. Look for what the previous reviewer missed."
+codex review --uncommitted -m o3 "..."
 ```
+
+### What to include in the prompt
+
+| 항목 | 출처 | 포함 여부 |
+|------|------|----------|
+| 태스크 목표 | `plan.md` → ## Goal | 항상 포함 (1줄 요약) |
+| 이전 리뷰어 비고 | `reviewer` 출력 → ### Notes | 있을 때만 포함 |
+| constraints.md | — | 포함하지 않음 (Codex는 독립 판단) |
+| 구현 파일 원문 | — | 포함하지 않음 (git diff로 충분) |
 
 ---
 
@@ -60,6 +89,7 @@ codex review --uncommitted "Be adversarial. Focus on: correctness, security, typ
 ## Constraints
 
 - Run only after `reviewer` (opus) has already given PASS
+- Pass only task goal + previous reviewer notes — never pass constraints.md or full file contents
 - If `codex` is not installed or not authenticated, skip and warn the orchestrator — do not block the workflow
 - On FAIL: return issues to orchestrator, do not proceed to `git-commit`
 - On PASS: signal orchestrator to proceed to `git-commit`
