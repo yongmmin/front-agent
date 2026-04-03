@@ -17,18 +17,6 @@ Codex is a different model with no shared context — it will catch different th
 
 ---
 
-## Model
-
-Use `o3` for adversarial review — stronger reasoning for edge case detection than `gpt-5.4`.
-
-```bash
-codex review --base main -m o3 "..."
-```
-
-If `o3` is unavailable or rate-limited, fall back to the user's default model (omit `-m`).
-
----
-
 ## How To Run
 
 Build the review prompt from two sources:
@@ -40,18 +28,18 @@ Build the review prompt from two sources:
 | `constraints.md` | — | Never — Codex judges independently |
 | Full file contents | — | Never — git diff is sufficient |
 
+**Important**: `codex-review` always runs before `git-branch` / `git-commit`, so changes are always uncommitted at this point. Always use `--uncommitted`:
+
 ```bash
-codex review --base main -m o3 \
+codex review --uncommitted -m o3 \
   "Task: [plan.md Goal in one line]
 Previous reviewer (Claude opus) PASS notes: [reviewer Notes section, or 'none']
 Now review independently. Be adversarial. Focus on: correctness, security, type safety, and edge cases. Look for what the previous reviewer missed."
 ```
 
-If the branch is not yet created (uncommitted changes only):
+If `o3` is unavailable or rate-limited, fall back to the user's default model (omit `-m`).
 
-```bash
-codex review --uncommitted -m o3 "..."
-```
+**No git repository**: If the working directory is not a git repo, skip `codex-review` and warn the orchestrator — do not block the workflow.
 
 ---
 
@@ -112,8 +100,9 @@ Proceed to `git-commit` as-is. Record the override decision in the handoff block
 ## Constraints
 
 - Run only after `reviewer` (opus) has already given PASS
+- Always use `--uncommitted` — codex-review runs before git-branch/git-commit, so changes are always uncommitted
 - Pass only task goal + previous reviewer notes — never pass `constraints.md` or full file contents
-- If `codex` is not installed or not authenticated, skip and warn the orchestrator — do not block the workflow
+- If `codex` is not installed, not authenticated, or the working directory is not a git repo: skip and warn the orchestrator — do not block the workflow
 - On FAIL: surface to user — do not auto-fix without user approval
 - On PASS or user override: signal orchestrator to proceed to `git-commit`
 - Max one fix-retry cycle per task

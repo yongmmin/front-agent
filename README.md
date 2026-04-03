@@ -113,11 +113,15 @@ done
   → plan.md 생성 + 사용자 승인
   → [인텐트별 실행: feature / figma / ui / refactor]
   → reviewer (opus) — 코드 품질/TypeScript/보안 리뷰
+  → codex-review — OpenAI o3 독립 adversarial 리뷰 (uncommitted diff 기준)
   → git-branch → git-commit → git-pr
   → save-knowledge? — 학습된 내용 있을 때만 저장
 ```
 
 `?` = 조건부 실행. Skip Rules에 해당하면 건너뜀.
+
+**이중 게이트**: `reviewer` PASS + `codex-review` PASS 모두 통과해야 `git-commit` 진행.
+`codex-review` FAIL 시 자동 수정 없음 — Fix(재시도 1회) 또는 Override(기록 후 진행) 중 선택.
 
 ---
 
@@ -170,6 +174,8 @@ AI의 실수가 구조적으로 반복 불가능하도록 시스템을 바꾸는
 | **실패 → 규칙 루프** | `agents/reviewer.md`, `agents/test-runner.md` | 반복 실패 패턴을 `constraints.md`에 자동 기록 |
 | **Skip Rules** | `CLAUDE.md` | 불필요한 에이전트 호출 조건부 스킵 |
 | **Compact Handoff** | `CLAUDE.md` | 에이전트 간 전달 컨텍스트를 5-bullet 구조체로 제한 |
+| **이중 게이트** | `skills/codex-review/SKILL.md` | `reviewer` PASS + `codex-review` PASS 모두 통과해야 commit 허용 |
+| **codex-review** | `skills/codex-review/SKILL.md` | OpenAI o3로 독립 adversarial 리뷰 — uncommitted diff만 검토, git repo 없으면 graceful skip |
 
 ### constraints.md 온디맨드 구조
 
@@ -237,6 +243,12 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 ---
 
 ## 변경 이력
+
+### v6.1: codex-review 범위 수정 (hot-fix)
+
+- **`--uncommitted` 강제** — `codex-review`는 항상 `git-branch` 이전에 실행되므로 변경사항이 uncommitted 상태. `--base main` 대신 `--uncommitted` 사용으로 현재 작업 diff만 검토
+- **git repo 없음 → graceful skip** — git 저장소가 없는 환경에서도 워크플로우 블록 없이 warning만 출력
+- **중복 model 섹션 제거** — SKILL.md 구버전 `--base main` 예시 정리
 
 ### v5 → v6: Codex Adversarial Review
 
