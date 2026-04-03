@@ -140,7 +140,7 @@ Rules:
 
 ```
 search-knowledge? -> component-auditor? -> developer
--> test-runner -> api-integrator? -> reviewer
+-> test-runner -> api-integrator? -> reviewer -> codex-review
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
@@ -148,7 +148,7 @@ search-knowledge? -> component-auditor? -> developer
 
 ```
 search-knowledge? -> component-auditor -> ui-builder
--> pixel-check -> a11y-check -> reviewer
+-> pixel-check -> a11y-check -> reviewer -> codex-review
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
@@ -156,7 +156,7 @@ search-knowledge? -> component-auditor -> ui-builder
 
 ```
 search-knowledge? -> component-auditor -> ui-builder
--> a11y-check -> reviewer
+-> a11y-check -> reviewer -> codex-review
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
@@ -164,7 +164,7 @@ search-knowledge? -> component-auditor -> ui-builder
 
 ```
 search-knowledge? -> refactor-architect -> user re-approval
--> component-auditor? -> developer -> test-runner -> reviewer
+-> component-auditor? -> developer -> test-runner -> reviewer -> codex-review
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 

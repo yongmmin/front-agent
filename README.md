@@ -148,6 +148,7 @@ done
 | `refactor-scan` | 리팩토링 |
 | `component-audit` | UI/기능 구현 전 |
 | `save-knowledge` | 작업 완료 후 |
+| `codex-review` | reviewer PASS 후 — Codex(OpenAI) 독립 리뷰 |
 | `git-branch` / `git-commit` / `git-pr` / `git-issue` | 구현 완료 후 |
 
 ---
@@ -271,8 +272,10 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 - [x] **도구 경계 하드 강제** — .env* 하드 차단 (settings.json Deny) + config 파일 검토 요청 (PreToolUse 훅) + install.sh 자동 적용
 - [x] **런타임 컨텍스트 최적화 v5** — CLAUDE.md 경량화, Skip Rules, Compact Handoff, 레거시 에이전트 정리
 
+**완료**
+- [x] **Codex adversarial review** — `codex-review` 스킬, reviewer PASS 후 OpenAI 독립 검토
+
 **예정**
-- [ ] ** Codex adversarial review** —다른 AI로 독립 검토, self-review 편향 제거
 - [ ] **구조 테스트** — 의존성 규칙을 실제 테스트 코드로 강제
 - [ ] **Obsidian 연동** — Wisdom Hub를 Obsidian vault로 교체
 - [ ] **Lighthouse CI 연동** — 성능 지표 자동 검사

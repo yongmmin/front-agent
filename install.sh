@@ -31,7 +31,7 @@ echo "Setting up skill symlinks..."
 mkdir -p "$CLAUDE_DIR/skills" "$CLAUDE_DIR/commands"
 for skill in front-agent implement-figma match-style tdd code-review a11y-check \
   pixel-check refactor-scan component-audit save-knowledge search-knowledge \
-  git-branch git-commit git-pr git-issue; do
+  git-branch git-commit git-pr git-issue codex-review; do
   link_skill "$PLUGIN_DIR/skills/$skill" "$CLAUDE_DIR/skills/$skill"
   echo "Use the $skill skill. Arguments: \$ARGUMENTS" > "$CLAUDE_DIR/commands/$skill.md"
   echo "  ✓ $skill"
