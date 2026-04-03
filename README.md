@@ -238,6 +238,14 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 
 ## 변경 이력
 
+### v5 → v6: Codex Adversarial Review
+
+- **`codex-review` 스킬 추가** — OpenAI Codex CLI(`o3` 모델) 기반 독립 리뷰
+- **이중 게이트** — `reviewer` PASS + `codex-review` PASS 모두 통과해야 `git-commit` 진행
+- **FAIL 시 유저 판단 위임** — 자동 수정 없음. Fix(재시도 1회) or Override(기록 후 진행) 선택
+- **컨텍스트 설계** — plan.md Goal + reviewer Notes만 전달, constraints.md/파일 원문 제외
+- `constraints.md` `#review` 섹션 + `CLAUDE.md` Runtime Rules에 이중 게이트 명시
+
 ### v4 → v5: 런타임 컨텍스트 최적화
 
 - **CLAUDE.md 경량화** — 267줄 → 95줄. 워크플로우 반복 제거, 런타임 가드레일만 유지. 매 turn 토큰 절감
