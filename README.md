@@ -261,6 +261,14 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 
 ## 변경 이력
 
+### v6.3: 산출물 품질 강화
+
+- **엣지 케이스 강제** — `constraints.md #completion`에 null/undefined, 빈 배열, 네트워크 실패, 로딩/에러 상태 커버 요구 추가. happy-path 테스트만으로 완료 불가
+- **React 성능 안티패턴 FAIL 기준 추가** — `constraints.md #review`: useEffect 의존성 오류, 인라인 객체/함수 prop, React.memo 누락, useMemo 남용, 렌더 경로 블로킹 연산
+- **로직 정확도 FAIL 기준 추가** — null/undefined 미가드 접근, async 에러 미처리, 빈 목록/경계값 미처리
+- **pixel-check 체크 기준 명시** — spacing(4px grid), typography, 컬러 토큰 사용 여부, 컴포넌트 재사용, 인터랙티브 상태, 반응형 breakpoint
+- `agents/reviewer.md` 워크플로우에 React 성능 + 엣지 케이스 검토 명시 (상세 기준은 constraints.md #review 온디맨드)
+
 ### v6.2: API Spec Check 추가
 
 - **API Spec Check 단계 신설** — `feature` 인텐트 + API 키워드(`fetch`, `axios`, `GraphQL`, `mutation`, `WebSocket`, `서버`, `백엔드` 등) 감지 시 plan 전에 명세서 요청

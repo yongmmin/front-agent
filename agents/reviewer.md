@@ -16,7 +16,7 @@
 ## Workflow
 
 1. Read changed files
-2. Review for correctness, TypeScript safety, conventions, and security
+2. Review for: correctness, TypeScript safety, security, React performance anti-patterns, edge case coverage — criteria in `constraints.md #review`
 3. Return PASS or FAIL
 4. On FAIL, provide a compact fix list for the next implementation pass
 5. On FAIL, append a repeatable rule to `constraints.md` if the mistake is systemic

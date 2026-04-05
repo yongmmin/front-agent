@@ -43,6 +43,7 @@
 - Never declare completion without test execution results
 - If `harness_loop` exceeds `MAX_ATTEMPTS` (3), do not declare completion. Create a GitHub issue and report the failure
 - Output code only. Do not include explanations, summaries, or "I did X" narration
+- Tests must cover edge cases: null/undefined inputs, empty arrays/objects, network failure, loading state, and error state — happy-path-only tests do not satisfy this rule
 
 ---
 
@@ -52,6 +53,18 @@
 - Do not proceed to `git-commit` without codex-review PASS or explicit user override
 - If the reviewer returns FAIL and the issue is a repeatable pattern, add a rule to `#failure-patterns`
 - Do not record one-off mistakes, such as typos or file-specific edge cases, as patterns
+
+React performance — FAIL if any:
+- `useEffect` missing dependency or including unstable reference causing infinite loop
+- Inline object/function literal passed as prop on every render with no `useMemo`/`useCallback`
+- `React.memo` absent on a pure component receiving stable props that re-renders from parent
+- `useMemo`/`useCallback` wrapping a primitive or trivially cheap expression (overhead > benefit)
+- Synchronous blocking operation (sort, filter on large array, heavy computation) in render path without memoization
+
+Logic correctness — FAIL if any:
+- Property access on potentially null/undefined value without guard
+- Async operation without error handling surfaced to UI
+- Edge cases not handled: empty list, zero value, boundary input
 
 ---
 
