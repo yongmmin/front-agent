@@ -128,11 +128,13 @@ done
 
 ### 인텐트별 워크플로우
 
+`||` = 병렬 실행 — 두 에이전트 동시 시작, 둘 다 완료 후 다음 단계 진행.
+
 | 인텐트 | 워크플로우 |
 |--------|----------|
-| `feature` | `search-knowledge? → component-auditor? → developer → test-runner → api-integrator? → reviewer → codex-review → git-*` |
-| `figma` | `search-knowledge? → component-auditor → ui-builder → pixel-check → a11y-check → reviewer → codex-review → git-*` |
-| `ui` | `search-knowledge? → component-auditor → ui-builder → a11y-check → reviewer → codex-review → git-*` |
+| `feature` | `[search-knowledge? \|\| component-auditor?] → developer → test-runner → api-integrator? → reviewer → codex-review → git-*` |
+| `figma` | `[search-knowledge? \|\| component-auditor] → ui-builder → [pixel-check \|\| a11y-check] → reviewer → codex-review → git-*` |
+| `ui` | `[search-knowledge? \|\| component-auditor] → ui-builder → a11y-check → reviewer → codex-review → git-*` |
 | `refactor` | `search-knowledge? → refactor-architect → 사용자 재승인 → component-auditor? → developer → test-runner → reviewer → codex-review → git-*` |
 | `review` | `reviewer` |
 
@@ -260,6 +262,13 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 ---
 
 ## 변경 이력
+
+### v6.4: 병렬 실행
+
+- **`search-knowledge` + `component-auditor` 병렬화** — 둘 다 읽기 전용 탐색으로 독립적. feature/figma/ui 워크플로우에서 동시 실행
+- **`pixel-check` + `a11y-check` 병렬화** — Figma 워크플로우에서 ui-builder 완료 후 동시 실행
+- Refactor는 `search-knowledge → refactor-architect` 순서 의존성 유지 (변경 없음)
+- `||` 표기로 SKILL.md 워크플로우에 병렬 지점 명시
 
 ### v6.3: 산출물 품질 강화
 

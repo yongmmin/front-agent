@@ -146,6 +146,8 @@ Rules:
 
 ## Workflow Selection
 
+`||` = run in parallel — launch both agents simultaneously and wait for both before proceeding.
+
 ### Shared Skip Rules
 
 - Skip `search-knowledge` if stored knowledge is empty or irrelevant
@@ -156,7 +158,7 @@ Rules:
 ### Feature
 
 ```
-search-knowledge? -> component-auditor? -> developer
+[search-knowledge? || component-auditor?] -> developer
 -> test-runner -> api-integrator? -> reviewer -> codex-review
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
@@ -164,15 +166,15 @@ search-knowledge? -> component-auditor? -> developer
 ### Figma
 
 ```
-search-knowledge? -> component-auditor -> ui-builder
--> pixel-check -> a11y-check -> reviewer -> codex-review
+[search-knowledge? || component-auditor] -> ui-builder
+-> [pixel-check || a11y-check] -> reviewer -> codex-review
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
 ### UI Without Design
 
 ```
-search-knowledge? -> component-auditor -> ui-builder
+[search-knowledge? || component-auditor] -> ui-builder
 -> a11y-check -> reviewer -> codex-review
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
