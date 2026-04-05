@@ -24,6 +24,7 @@ Lean runtime rules for the plugin. Human-oriented detail belongs in `README.md`,
 | `review` | Contains Korean review terms such as `리뷰`, `검토`, `확인해줘` | Code review |
 
 If the intent is `ui` and no Figma URL is present, ask for one in the user's language.
+If the intent is `feature` and the request contains API keywords (`fetch`, `axios`, `API`, `GraphQL`, `mutation`, `WebSocket`, `서버`, `백엔드`, `연결`, `데이터`, `실시간`), run API Spec Check before planning — spec is passed only to `api-integrator`, never to other agents.
 
 ---
 

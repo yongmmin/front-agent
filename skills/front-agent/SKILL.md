@@ -32,7 +32,6 @@ Do not ask the user to run `/setup`.
 Ask a clarification question before planning if any of the following apply:
 
 - The target is unclear
-- API or integration details are missing
 - Scope is overly broad
 - The request mixes multiple major tasks
 - "Optimize" or "improve" does not specify what dimension matters
@@ -59,7 +58,25 @@ If intent is `ui` and no Figma URL is present, ask for one in the user's languag
 - URL provided -> `figma`
 - No URL -> `ui`
 
-### 5. Plan Gate
+### 5. API Spec Check
+
+**Trigger**: intent is `feature` AND request contains any API keyword:
+`fetch`, `axios`, `API`, `GraphQL`, `query`, `mutation`, `Apollo`, `WebSocket`, `endpoint`, `서버`, `백엔드`, `연결`, `데이터`, `불러와`, `저장`, `실시간`
+
+If triggered, ask once in the user's language:
+> "Do you have an API spec? (Swagger/OpenAPI URL, GraphQL schema, `.md`/`.yaml` file, or paste the endpoint directly)"
+
+| Response | Action |
+|----------|--------|
+| URL or file provided | Record in `plan.md → Inputs.API`; fetch on demand in `api-integrator` step only |
+| Endpoint/query pasted directly | Record as-is in `plan.md → Inputs.API` |
+| None available | Ask: "What request/response shape do you expect?" — record the described shape |
+
+**Token budget rules:**
+- Pass API spec only to `api-integrator` — never to `developer`, `ui-builder`, or other agents
+- If a URL was provided, `api-integrator` fetches only the relevant endpoint(s) on demand — do not load the full document upfront
+
+### 6. Plan Gate
 
 Create `plan.md`, then wait for explicit user approval before any execution.
 

@@ -110,6 +110,7 @@ done
   → Lazy Setup — knowledge/index.md 없으면 자동 초기화 (최초 1회)
   → isAmbiguous 체크 — 모호하면 명확화 질문 (최대 2개)
   → Figma 체크 — ui 인텐트인데 URL 없으면 요청
+  → API Spec 체크 — feature 인텐트 + API 키워드 감지 시 명세서 요청 (REST/GraphQL/WebSocket)
   → search-knowledge? (haiku) — 지식 있을 때만 로드
   → component-auditor? (haiku) — UI 작업 시만 실행
   → plan.md 생성 + 사용자 승인
@@ -259,6 +260,13 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 ---
 
 ## 변경 이력
+
+### v6.2: API Spec Check 추가
+
+- **API Spec Check 단계 신설** — `feature` 인텐트 + API 키워드(`fetch`, `axios`, `GraphQL`, `mutation`, `WebSocket`, `서버`, `백엔드` 등) 감지 시 plan 전에 명세서 요청
+- **지원 형식** — Swagger/OpenAPI URL, GraphQL schema, `.md`/`.yaml` 파일, 엔드포인트 직접 입력
+- **토큰 최적화** — 명세서는 `api-integrator`에만 온디맨드 전달, 다른 에이전트에 전파 없음
+- `CLAUDE.md` Intent Routing + `skills/front-agent/SKILL.md` Request Gate 동시 반영
 
 ### v6.1: codex-review 범위 수정 (hot-fix)
 
