@@ -1,6 +1,6 @@
 # Agent: Test Runner
 
-**Model**: sonnet
+**Model**: haiku
 **Role**: Run relevant tests, summarize results, and escalate repeatable failures.
 
 ---

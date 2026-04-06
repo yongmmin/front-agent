@@ -148,7 +148,7 @@ done
 | `developer` | sonnet | TDD 기반 기능 구현 (test-writer + implementer 통합) |
 | `ui-builder` | sonnet | Figma 또는 기존 스타일 기반 UI 구현 (figma-builder + style-matcher 통합) |
 | `api-integrator` | sonnet | UI-API 연결 + 로딩/에러 상태 처리 |
-| `test-runner` | sonnet | 테스트 실행 + MAX_ATTEMPTS 초과 시 GitHub 이슈 생성 |
+| `test-runner` | haiku | 테스트 실행 + MAX_ATTEMPTS 초과 시 GitHub 이슈 생성 |
 | `reviewer` | opus | 코드 품질, TypeScript, 보안 리뷰 |
 | `refactor-architect` | opus | 반복 패턴 탐지 + 리팩토링 설계 |
 
@@ -162,7 +162,7 @@ done
 |------|----------|
 | `search-knowledge` | Step 0 — 지식 있을 때만 (조건부) |
 | `component-audit` | UI/기능 구현 전 — 조건부 |
-| `tdd` | 기능 구현 / 리팩토링 |
+| `tdd` | 사용자가 직접 `/tdd`로 호출 시 — front-agent 내부에서는 `developer`를 직접 사용 |
 | `implement-figma` / `match-style` | UI 구현 |
 | `pixel-check` | Figma 구현 후 검증 |
 | `a11y-check` | UI 구현 후 검증 |
@@ -262,6 +262,12 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 ---
 
 ## 변경 이력
+
+### v6.5: 하네스 재검증
+
+- **`test-runner` sonnet → haiku** — Bash 실행 + 결과 요약이 주 역할. haiku로 충분, 토큰 절감
+- **`constraints.md #completion` 중복 제거** — `developer.md`에 이미 6개 항목 Test Coverage Checklist 존재. 같은 내용을 두 파일에서 읽는 중복 제거
+- **`tdd` 스킬 설명 수정** — front-agent는 내부적으로 `developer`를 직접 호출. `tdd`는 사용자 직접 호출용 standalone 스킬
 
 ### v6.4: 병렬 실행
 

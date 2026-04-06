@@ -43,7 +43,6 @@
 - Never declare completion without test execution results
 - If `harness_loop` exceeds `MAX_ATTEMPTS` (3), do not declare completion. Create a GitHub issue and report the failure
 - Output code only. Do not include explanations, summaries, or "I did X" narration
-- Tests must cover edge cases: null/undefined inputs, empty arrays/objects, network failure, loading state, and error state — happy-path-only tests do not satisfy this rule
 
 ---
 
