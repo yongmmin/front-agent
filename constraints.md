@@ -2,6 +2,7 @@
 
 > **On-demand loading rule**: Do not pass this entire file to every agent.
 > Each agent receives only the section tags relevant to its role.
+> Extract via `bash hooks/extract-constraints.sh <agent-name>` — never inline the full file into an agent prompt.
 >
 > | Section tag | Target agents |
 > |-------------|---------------|
