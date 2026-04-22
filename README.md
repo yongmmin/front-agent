@@ -132,10 +132,10 @@ done
 
 | 인텐트 | 워크플로우 |
 |--------|----------|
-| `feature` | `[search-knowledge? \|\| component-auditor?] → developer → test-runner → api-integrator? → reviewer → codex-review → git-*` |
-| `figma` | `[search-knowledge? \|\| component-auditor] → ui-builder → [pixel-check \|\| a11y-check] → reviewer → codex-review → git-*` |
-| `ui` | `[search-knowledge? \|\| component-auditor] → ui-builder → a11y-check → reviewer → codex-review → git-*` |
-| `refactor` | `search-knowledge? → refactor-architect → 사용자 재승인 → component-auditor? → developer → test-runner → reviewer → codex-review → git-*` |
+| `feature` | `[search-knowledge? \|\| component-auditor?] → developer → test-runner → api-integrator? → [reviewer \|\| codex-review] → git-*` |
+| `figma` | `[search-knowledge? \|\| component-auditor] → ui-builder → [pixel-check \|\| a11y-check] → [reviewer \|\| codex-review] → git-*` |
+| `ui` | `[search-knowledge? \|\| component-auditor] → ui-builder → a11y-check → [reviewer \|\| codex-review] → git-*` |
+| `refactor` | `search-knowledge? → refactor-architect → 사용자 재승인 → component-auditor? → developer → test-runner → [reviewer \|\| codex-review] → git-*` |
 | `review` | `reviewer` |
 
 ---

@@ -148,6 +148,8 @@ Rules:
 
 `||` = run in parallel — launch both agents simultaneously and wait for both before proceeding.
 
+**Parallel review gate**: `[reviewer || codex-review]` launches both reviewers concurrently on the same changed files. `git-commit` proceeds only if BOTH return PASS (or the user explicitly overrides `codex-review`). Any FAIL blocks commit and its fix list feeds the retry loop.
+
 ### Shared Skip Rules
 
 - Skip `search-knowledge` if stored knowledge is empty or irrelevant
@@ -159,7 +161,7 @@ Rules:
 
 ```
 [search-knowledge? || component-auditor?] -> developer
--> test-runner -> api-integrator? -> reviewer -> codex-review
+-> test-runner -> api-integrator? -> [reviewer || codex-review]
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
@@ -167,7 +169,7 @@ Rules:
 
 ```
 [search-knowledge? || component-auditor] -> ui-builder
--> [pixel-check || a11y-check] -> reviewer -> codex-review
+-> [pixel-check || a11y-check] -> [reviewer || codex-review]
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
@@ -175,7 +177,7 @@ Rules:
 
 ```
 [search-knowledge? || component-auditor] -> ui-builder
--> a11y-check -> reviewer -> codex-review
+-> a11y-check -> [reviewer || codex-review]
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 
@@ -183,7 +185,7 @@ Rules:
 
 ```
 search-knowledge? -> refactor-architect -> user re-approval
--> component-auditor? -> developer -> test-runner -> reviewer -> codex-review
+-> component-auditor? -> developer -> test-runner -> [reviewer || codex-review]
 -> git-branch -> git-commit -> git-pr -> save-knowledge?
 ```
 

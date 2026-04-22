@@ -30,7 +30,7 @@
           {
             "type": "command",
             "command": "bash \"$(dirname \"$0\")/post-tool-use.sh\"",
-            "timeout": 30
+            "timeout": 60
           }
         ]
       }

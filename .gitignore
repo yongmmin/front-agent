@@ -29,3 +29,9 @@ node_modules/
 .idea/
 *.swp
 *.swo
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# fe-copilot hook cache (debounce + tsc/eslint intermediate output)
+.fe-copilot-cache/

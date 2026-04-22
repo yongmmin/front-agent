@@ -37,6 +37,7 @@ If the intent is `feature` and the request contains API keywords (`fetch`, `axio
 - Never load the full `constraints.md` into every agent
 - Never pass unrelated files, full repo docs, or raw verbose logs to spawned agents
 - `git-commit` requires both `reviewer` PASS and `codex-review` PASS (or explicit user override)
+- `reviewer` and `codex-review` run in parallel (`[reviewer || codex-review]`) — both read the same changed files, launch concurrently, and commit proceeds only when both return PASS
 
 ---
 
