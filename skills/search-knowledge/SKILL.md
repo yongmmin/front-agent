@@ -26,6 +26,7 @@ description: Search project and global knowledge sources using compact, on-deman
 
 ## Fast-Skip Rules
 
+- **Pre-spawn skip**: `front-agent` must run `hooks/knowledge-has-content.sh` before invoking this skill. If it exits non-zero (placeholder-only / empty), do NOT spawn the agent — return `No relevant entries found` inline and continue the workflow.
 - If summaries contain only placeholders or no relevant matches, stop early
 - Do not open detail files unless the summary/index suggests a relevant hit
 - Do not load unrelated domains "just in case"

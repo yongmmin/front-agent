@@ -118,7 +118,7 @@ Ask: `Please review plan.md. Approve it and I will execute.`
 For each agent call, include only:
 
 1. The relevant `agents/*.md` file
-2. The relevant `constraints.md` sections
+2. The relevant `constraints.md` sections — obtained via `bash hooks/extract-constraints.sh <agent-name>`. Do not pass the full file.
 3. The minimal `plan.md` excerpt needed for that step
 4. A compact handoff block
 5. Only the exact files needed for execution
@@ -152,7 +152,7 @@ Rules:
 
 ### Shared Skip Rules
 
-- Skip `search-knowledge` if stored knowledge is empty or irrelevant
+- Skip `search-knowledge` if stored knowledge is empty or irrelevant. Run `bash hooks/knowledge-has-content.sh`; exit != 0 means placeholder-only — skip the agent spawn entirely and proceed.
 - Skip `component-auditor` for review-only tasks and pure API wiring with no UI change
 - Skip `api-integrator` unless UI data fetching or mutation behavior changes
 - Skip `save-knowledge` if the task produced no durable learning

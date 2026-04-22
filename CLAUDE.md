@@ -46,7 +46,7 @@ If the intent is `feature` and the request contains API keywords (`fetch`, `axio
 For each spawned agent, pass only:
 
 1. The agent file
-2. The relevant `constraints.md` sections
+2. The relevant `constraints.md` sections — obtained via `bash hooks/extract-constraints.sh <agent-name>`. Never pass the full `constraints.md`.
 3. The minimal `plan.md` excerpt needed for that step
 4. A compact handoff block
 5. Only the exact files required for the task

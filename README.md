@@ -263,6 +263,15 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 
 ## 변경 이력
 
+### v6.6: 런타임 성능 4종 최적화
+
+온디맨드 로딩 규칙을 유지한 채 플러그인 자체 실행 비용을 감축. 병목 큰 순서로 4개 항목 일괄 반영.
+
+- **#1 PostToolUse tsc 비용 절감** — `hooks/post-tool-use.sh`에 `tsc --incremental` + per-file 3초 디바운스 + `tsc`∥`eslint` 병렬 실행 도입. 파일 저장 1회당 풀 프로젝트 타입체크가 돌던 구조를 incremental + 캐시 기반으로 전환. `hooks.json` PostToolUse timeout 30→60s, `.gitignore`에 `*.tsbuildinfo` / `.fe-copilot-cache/` 추가
+- **#2 reviewer ∥ codex-review 병렬 게이트** — 모든 워크플로우(`feature`/`figma`/`ui`/`refactor`)의 `reviewer → codex-review` 순차 체인을 `[reviewer || codex-review]`로 변경. 두 에이전트가 동일한 changed files를 동시에 읽고, 둘 다 PASS일 때만 `git-commit` 진행 (override 규칙 유지)
+- **#3 search-knowledge 콜드 비용 제거** — `hooks/knowledge-has-content.sh` 신설. `front-agent`는 skill 호출 전 이 스크립트로 placeholder-only 여부를 판별, 비어 있으면 agent spawn 없이 `No relevant entries found`로 바로 진행. 현재처럼 knowledge가 비어있는 초기 상태에서 haiku 에이전트 기동 비용을 완전히 제거
+- **#4 constraints 섹션 추출 메커니즘** — `hooks/extract-constraints.sh <agent-name>` 신설. 규칙은 "태그된 섹션만 전달"이었으나 실 추출 메커니즘이 없어 사실상 전체 파일이 전달되던 문제 해결. agent별 매핑(developer/ui-builder/api-integrator → `#code-rules`+`#filesystem`+`#completion`, reviewer → `#review`+`#failure-patterns`, test-runner → `#completion`+`#failure-patterns`, refactor-architect/component-auditor → `#code-rules`)에 따라 해당 섹션만 stdout으로 반환. `CLAUDE.md` / `skills/front-agent/SKILL.md` / `constraints.md`에 사용 규칙 명문화
+
 ### v6.5: 하네스 재검증
 
 - **`test-runner` sonnet → haiku** — Bash 실행 + 결과 요약이 주 역할. haiku로 충분, 토큰 절감
@@ -340,6 +349,7 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 - [x] **도구 경계 하드 강제** — .env* 하드 차단 (settings.json Deny) + config 파일 검토 요청 (PreToolUse 훅) + install.sh 자동 적용
 - [x] **런타임 컨텍스트 최적화 v5** — CLAUDE.md 경량화, Skip Rules, Compact Handoff, 레거시 에이전트 정리
 - [x] **Codex adversarial review v6** — `codex-review` 스킬, reviewer PASS 후 OpenAI o3 독립 검토, changed_files scoped diff
+- [x] **런타임 성능 최적화 v6.6** — PostToolUse incremental/디바운스/병렬, reviewer∥codex-review, search-knowledge 콜드 스킵, constraints 섹션 추출 스크립트
 
 **예정**
 - [ ] **구조 테스트** — 의존성 규칙을 실제 테스트 코드로 강제
