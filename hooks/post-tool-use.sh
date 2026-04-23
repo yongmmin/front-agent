@@ -3,14 +3,19 @@
 # Run compact validation after Write/Edit on TypeScript files.
 # Perf: incremental tsc + per-file debounce + tsc||eslint in parallel.
 
-FILE_PATH=$(echo "${CLAUDE_TOOL_INPUT:-{}}" | python3 -c "
-import sys, json
-try:
-    data = json.load(sys.stdin)
-    print(data.get('file_path', ''))
-except:
-    print('')
-" 2>/dev/null)
+# Parse file_path from CLAUDE_TOOL_INPUT JSON. Prefer jq (~5ms) over python3 (~80ms).
+parse_file_path() {
+  local input="${CLAUDE_TOOL_INPUT:-{\}}"
+  if command -v jq >/dev/null 2>&1; then
+    printf '%s' "$input" | jq -r '.file_path // ""' 2>/dev/null
+  else
+    printf '%s' "$input" | python3 -c "import sys,json
+try: print(json.load(sys.stdin).get('file_path',''))
+except: print('')" 2>/dev/null
+  fi
+}
+
+FILE_PATH=$(parse_file_path)
 
 if [ -z "$FILE_PATH" ]; then
   exit 0
@@ -19,6 +24,13 @@ fi
 if [[ "$FILE_PATH" != *.ts && "$FILE_PATH" != *.tsx ]]; then
   exit 0
 fi
+
+# Skip test files — they often use separate tsconfig and produce noisy false positives.
+case "$FILE_PATH" in
+  *.spec.ts|*.spec.tsx|*.test.ts|*.test.tsx|*/__tests__/*|*/__mocks__/*)
+    exit 0
+    ;;
+esac
 
 if [ ! -f "$FILE_PATH" ]; then
   exit 0

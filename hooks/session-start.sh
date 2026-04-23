@@ -8,6 +8,13 @@ WISDOM_DIR="$HOME/.front-agent/wisdom"
 WISDOM_SUMMARY="$WISDOM_DIR/summary.md"
 MAX_WISDOM_LINES=10
 
+# Cache TTL cleanup: remove PostToolUse debounce/output files older than 1 hour.
+# Silent & best-effort — never block session start.
+CACHE_DIR="$PLUGIN_DIR/.fe-copilot-cache"
+if [ -d "$CACHE_DIR" ]; then
+  find "$CACHE_DIR" -type f -mmin +60 -delete 2>/dev/null || true
+fi
+
 if [ -f "$WISDOM_SUMMARY" ]; then
   LINE_COUNT=$(wc -l < "$WISDOM_SUMMARY")
   if [ "$LINE_COUNT" -gt 20 ]; then
