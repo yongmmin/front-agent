@@ -136,7 +136,7 @@ done
 | `figma` | `[search-knowledge? \|\| component-auditor] → ui-builder → [pixel-check \|\| a11y-check] → [reviewer \|\| codex-review] → git-*` |
 | `ui` | `[search-knowledge? \|\| component-auditor] → ui-builder → a11y-check → [reviewer \|\| codex-review] → git-*` |
 | `refactor` | `search-knowledge? → refactor-architect → 사용자 재승인 → component-auditor? → developer → test-runner → [reviewer \|\| codex-review] → git-*` |
-| `review` | `reviewer` |
+| `review` | `reviewer` (plan gate 생략 — fast-path) |
 
 ---
 
@@ -145,7 +145,7 @@ done
 | Agent | Model | Role |
 |-------|-------|------|
 | `component-auditor` | haiku | 재사용 가능 컴포넌트 탐색 |
-| `developer` | sonnet | TDD 기반 기능 구현 (test-writer + implementer 통합) |
+| `developer` | opus | TDD 기반 기능 구현 (test-writer + implementer 통합) |
 | `ui-builder` | sonnet | Figma 또는 기존 스타일 기반 UI 구현 (figma-builder + style-matcher 통합) |
 | `api-integrator` | sonnet | UI-API 연결 + 로딩/에러 상태 처리 |
 | `test-runner` | haiku | 테스트 실행 + MAX_ATTEMPTS 초과 시 GitHub 이슈 생성 |
@@ -263,6 +263,17 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 
 ## 변경 이력
 
+### v6.7: 핫패스 최적화 + developer opus 전환
+
+플러그인이 매 턴/매 저장마다 지불하던 고정 비용을 추가로 깎고, TDD 품질을 올리기 위해 developer를 opus로 승격.
+
+- **#1 훅 JSON 파싱 `python3` → `jq`** — `hooks/post-tool-use.sh`와 `hooks/pre-tool-use.sh`가 `CLAUDE_TOOL_INPUT` 파싱에 `python3 -c`를 쓰던 부분을 `jq -r` 우선 + python3 fallback으로 교체. Python 인터프리터 기동(~80ms)이 `jq`(~5ms)로 줄어들어 Write/Edit마다 발생하던 고정 지연 제거
+- **#2 PostToolUse 테스트 파일 스킵** — `*.spec.ts(x)`, `*.test.ts(x)`, `__tests__/`, `__mocks__/` 경로는 tsc + eslint 검증을 건너뜀. 테스트 전용 tsconfig/ESLint 규칙 차이로 생기던 노이즈 제거 + 저장 시 훅 비용 절감
+- **#3 `review` 인텐트 Fast-Path** — 순수 리뷰 요청은 `plan.md` 생성과 사용자 승인을 생략하고 `reviewer`로 직행. 리뷰는 변경을 만들지 않으므로 plan gate 마찰을 제거. `skills/front-agent/SKILL.md` Request Gate에 step 6로 명문화
+- **#4 `#failure-patterns` 사전 시드** — 기존에는 빈 상태여서 reviewer가 같은 실수를 반복 탐지. 흔한 React/Next.js 안티패턴 5개(useEffect cleanup 누락, index-as-key, 비-lazy useState 초기값, 부정확한 `"use client"` 경계, async 핸들러 에러 무방호) 사전 등록으로 reviewer 초회 통과율 상승
+- **#5 `.fe-copilot-cache` TTL 정리** — `hooks/session-start.sh`에 `find -mmin +60 -delete`로 1시간 초과 캐시 파일 자동 삭제. 디바운스/출력 파일이 누적되어 생기는 디렉터리 비대화 방지
+- **#6 `developer` 에이전트 opus 승격** — `agents/developer.md` Model `sonnet → opus`. TDD RED→GREEN 품질이 실패 재시도 횟수와 연결되므로 초회 정확도를 끌어올려 harness_loop 재시도 수를 줄이는 방향이 총비용 관점에서 유리. `CLAUDE.md` Model Routing 표도 정합성 반영
+
 ### v6.6: 런타임 성능 4종 최적화
 
 온디맨드 로딩 규칙을 유지한 채 플러그인 자체 실행 비용을 감축. 병목 큰 순서로 4개 항목 일괄 반영.
@@ -350,6 +361,7 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 - [x] **런타임 컨텍스트 최적화 v5** — CLAUDE.md 경량화, Skip Rules, Compact Handoff, 레거시 에이전트 정리
 - [x] **Codex adversarial review v6** — `codex-review` 스킬, reviewer PASS 후 OpenAI o3 독립 검토, changed_files scoped diff
 - [x] **런타임 성능 최적화 v6.6** — PostToolUse incremental/디바운스/병렬, reviewer∥codex-review, search-knowledge 콜드 스킵, constraints 섹션 추출 스크립트
+- [x] **핫패스 최적화 v6.7** — 훅 `jq` 파싱, PostToolUse 테스트 파일 스킵, review fast-path, failure-patterns 시드, 캐시 TTL 정리, developer opus 승격
 
 **예정**
 - [ ] **구조 테스트** — 의존성 규칙을 실제 테스트 코드로 강제

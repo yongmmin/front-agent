@@ -76,7 +76,13 @@ If triggered, ask once in the user's language:
 - Pass API spec only to `api-integrator` — never to `developer`, `ui-builder`, or other agents
 - If a URL was provided, `api-integrator` fetches only the relevant endpoint(s) on demand — do not load the full document upfront
 
-### 6. Plan Gate
+### 6. Review Fast-Path
+
+If intent is `review`, **skip the Plan Gate entirely** and spawn `reviewer` directly on the current changes. No `plan.md`, no user approval wait — pure review tasks do not need a plan. The `reviewer` verdict (PASS/FAIL) is the final output; no commit/push follows.
+
+Applies only when intent is exactly `review`. Any other intent still goes through the Plan Gate below.
+
+### 7. Plan Gate
 
 Create `plan.md`, then wait for explicit user approval before any execution.
 
@@ -190,6 +196,8 @@ search-knowledge? -> refactor-architect -> user re-approval
 ```
 
 ### Review
+
+Fast-path: bypasses the Plan Gate (see Request Gate step 6).
 
 ```
 reviewer

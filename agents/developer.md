@@ -1,6 +1,6 @@
 # Agent: Developer
 
-**Model**: sonnet
+**Model**: opus
 **Role**: Write test cases and implement features. TDD RED → GREEN cycle in one session.
 
 ---

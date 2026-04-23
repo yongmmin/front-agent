@@ -3,14 +3,14 @@
 # PreToolUse hook — warn before modifying review-required config files
 # Claude sees this warning and must ask the user for approval before proceeding.
 
-FILE_PATH=$(echo "${CLAUDE_TOOL_INPUT:-{}}" | python3 -c "
-import sys, json
-try:
-    data = json.load(sys.stdin)
-    print(data.get('file_path', ''))
-except:
-    print('')
-" 2>/dev/null)
+# Parse file_path from CLAUDE_TOOL_INPUT JSON. Prefer jq (~5ms) over python3 (~80ms).
+if command -v jq >/dev/null 2>&1; then
+  FILE_PATH=$(printf '%s' "${CLAUDE_TOOL_INPUT:-{\}}" | jq -r '.file_path // ""' 2>/dev/null)
+else
+  FILE_PATH=$(printf '%s' "${CLAUDE_TOOL_INPUT:-{\}}" | python3 -c "import sys,json
+try: print(json.load(sys.stdin).get('file_path',''))
+except: print('')" 2>/dev/null)
+fi
 
 if [ -z "$FILE_PATH" ]; then
   exit 0
