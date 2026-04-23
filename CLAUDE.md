@@ -94,5 +94,5 @@ Rules:
 | Model | Use cases |
 |------|-----------|
 | `haiku` | search, audit, lightweight discovery |
-| `sonnet` | implementation, tests, UI building, API integration |
-| `opus` | planning, refactor design, review |
+| `sonnet` | UI building, API integration, tests |
+| `opus` | planning, refactor design, review, developer (TDD implementation) |
