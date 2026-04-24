@@ -24,4 +24,3 @@ description: Find reusable components with compact output before UI work
 
 - Read-only
 - Keep the result compact enough to paste into a handoff block
-- Route `grep`/`rg`/`find`/`ls` calls through `bash hooks/rtk-wrap.sh <cmd> ...` (see `CLAUDE.md → RTK Wrapping`)
