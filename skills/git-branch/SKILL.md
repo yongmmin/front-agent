@@ -25,3 +25,4 @@ description: Create a task branch after plan approval
 - Use lowercase
 - Use hyphens, not spaces
 - Start from the current integration branch
+- Route `git` calls through `bash hooks/rtk-wrap.sh git ...` (see `CLAUDE.md → RTK Wrapping`)

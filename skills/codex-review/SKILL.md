@@ -34,7 +34,8 @@ Build the review prompt from two sources:
 
 ```bash
 # 1. Generate diff for only the files changed in this task
-DIFF=$(git diff HEAD -- src/features/login/LoginForm.tsx src/features/login/LoginForm.test.tsx)
+#    Route through rtk-wrap so `rtk git diff` compresses output when the mode is on.
+DIFF=$(bash hooks/rtk-wrap.sh git diff HEAD -- src/features/login/LoginForm.tsx src/features/login/LoginForm.test.tsx)
 
 # 2. Pass scoped diff inline to codex
 codex -m o3 "
@@ -122,3 +123,4 @@ Proceed to `git-commit` as-is. Record the override decision in the handoff block
 - On FAIL: surface to user — do not auto-fix without user approval
 - On PASS or user override: signal orchestrator to proceed to `git-commit`
 - Max one fix-retry cycle per task
+- Route `git diff` through `bash hooks/rtk-wrap.sh git diff ...` (see `CLAUDE.md → RTK Wrapping`)

@@ -22,6 +22,28 @@ description: Single entry point for frontend work. Classify intent, create a pla
 
 ## Request Gate
 
+### 0. RTK Mode Gate
+
+Resolve the rtk token-filter mode before any agent spawn. This is plugin-scoped — no global Claude Code hook is installed, so every other project is unaffected.
+
+**Resolution order:**
+
+1. **Inline arg** — if the user message contains `--rtk=<mode>` or `--no-rtk`, persist it with `bash hooks/rtk-wrap.sh --set <mode>` (use `off` for `--no-rtk`). Skip UI.
+2. **Env var** — if `FE_COPILOT_RTK` is set, do nothing. It is a hard override.
+3. **Session flag** — if `.fe-copilot-cache/rtk-session.flag` already exists, reuse it.
+4. **Otherwise** — launch the `AskUserQuestion` tool with a single question:
+   - Question: `이 작업에서 rtk로 명령 출력을 압축할까요?`
+   - Options:
+     - `Off — raw 명령 그대로 (기본 동작)`
+     - `On — standard (git/tsc/lint/test 압축) (Recommended)`
+     - `On — aggressive (+ ultra-compact)`
+     - `On — git-only (git 계열만 압축)`
+   - After answer, call `bash hooks/rtk-wrap.sh --set <mode>` where mode is `off | standard | aggressive | git-only`.
+
+Valid mode strings: `off`, `standard`, `aggressive`, `git-only`. Anything else must be rejected with a one-line error.
+
+The user can re-run `/rtk` at any time to change the mode mid-session.
+
 ### 1. Lazy Setup
 
 If `knowledge/index.md` is missing, initialize project knowledge automatically.
