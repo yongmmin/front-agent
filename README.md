@@ -2,10 +2,10 @@
 
 # Frontend Co-Pilot
 
-**Claude Code 플러그인 — 7개 에이전트, 15개 스킬, Harness Engineering**
+**Claude Code 플러그인 — 7개 에이전트, 17개 스킬, Harness Engineering**
 
 [![Agents](https://img.shields.io/badge/agents-7-green.svg)](#에이전트)
-[![Skills](https://img.shields.io/badge/skills-15-orange.svg)](#스킬)
+[![Skills](https://img.shields.io/badge/skills-17-orange.svg)](#스킬)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Stack](https://img.shields.io/badge/stack-React%20%2F%20Next.js-61DAFB.svg)](#호환-스택)
 
@@ -85,7 +85,7 @@ chmod +x install.sh && ./install.sh
 ```bash
 for skill in front-agent implement-figma match-style tdd code-review a11y-check \
   pixel-check refactor-scan component-audit save-knowledge search-knowledge \
-  codex-review git-branch git-commit git-pr git-issue; do
+  codex-review git-branch git-commit git-pr git-issue rtk-toggle; do
   rm -f ~/.claude/skills/$skill
   rm -f ~/.claude/commands/$skill.md
 done
@@ -107,6 +107,7 @@ done
 
 ```
 /front-agent [요청]
+  → RTK Mode Gate — 세션 첫 호출 시 UI 선택 (off / standard / aggressive / git-only)
   → Lazy Setup — knowledge/index.md 없으면 자동 초기화 (최초 1회)
   → isAmbiguous 체크 — 모호하면 명확화 질문 (최대 2개)
   → Figma 체크 — ui 인텐트인데 URL 없으면 요청
@@ -174,6 +175,7 @@ done
 | `git-commit` | reviewer + codex-review 이중 게이트 통과 후 |
 | `git-pr` | 커밋 후 PR 생성 |
 | `git-issue` | harness_loop MAX_ATTEMPTS(3) 초과 시 자동 생성 |
+| `rtk-toggle` | `/rtk` — 세션 중 rtk 모드 변경 (off / standard / aggressive / git-only) |
 
 ---
 
@@ -262,6 +264,18 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 ---
 
 ## 변경 이력
+
+### v6.8: rtk opt-in 통합 (플러그인 전용 토큰 필터)
+
+Rust 기반 CLI 압축 프록시 [rtk](https://github.com/rtk-ai/rtk)를 플러그인 범위에만 선택적으로 연결. 다른 Claude Code 프로젝트에는 영향 없음.
+
+- **`rtk init -g` 미실행** — 전역 Bash hook을 설치하지 않는다. 사용자가 터미널에서 직접 `git status`를 쳐도 raw 출력 그대로. 다른 프로젝트에서 Claude Code를 써도 동일
+- **`hooks/rtk-wrap.sh` 신설** — 플러그인 내부의 git/gh/tsc/eslint/jest/vitest/playwright/find/grep/ls 등 모든 Bash 호출이 반드시 이 래퍼를 경유. 모드에 따라 `rtk <cmd>` 또는 raw를 exec. rtk 미설치여도 graceful fallback
+- **UI 기반 모드 선택** — `/front-agent` Request Gate step 0에 `AskUserQuestion` 선택기 추가. 옵션: `off / standard / aggressive / git-only`. 선택은 `.fe-copilot-cache/rtk-session.flag`에 세션 유지
+- **`/rtk` 토글 스킬 신설** — 세션 중 언제든 모드 변경 가능 (`/rtk standard`, `/rtk off`, `/rtk status`, 또는 인자 없이 호출 시 UI 팝업)
+- **인자/env 오버라이드** — `/front-agent --rtk=aggressive` 또는 `/front-agent --no-rtk`로 UI 생략 가능. `FE_COPILOT_RTK` 환경변수는 최상위 우선순위
+- **PostToolUse 적용** — `hooks/post-tool-use.sh`의 `npx tsc`, `npx eslint` 호출을 rtk-wrap 경유로 전환. 모드 on일 때 저장 시마다 tsc/eslint 출력 압축
+- **스킬 통합** — `git-branch`, `git-commit`, `git-pr`, `git-issue`, `codex-review`, `component-audit` 및 `test-runner` 에이전트 문서에 래퍼 경유 규칙 명시. 중앙 규칙은 `CLAUDE.md → RTK Wrapping` 섹션
 
 ### v6.7: 핫패스 최적화 + developer opus 전환
 
@@ -362,6 +376,7 @@ React / Next.js (App Router) · TypeScript · Tailwind CSS · Vitest / Jest · G
 - [x] **Codex adversarial review v6** — `codex-review` 스킬, reviewer PASS 후 OpenAI o3 독립 검토, changed_files scoped diff
 - [x] **런타임 성능 최적화 v6.6** — PostToolUse incremental/디바운스/병렬, reviewer∥codex-review, search-knowledge 콜드 스킵, constraints 섹션 추출 스크립트
 - [x] **핫패스 최적화 v6.7** — 훅 `jq` 파싱, PostToolUse 테스트 파일 스킵, review fast-path, failure-patterns 시드, 캐시 TTL 정리, developer opus 승격
+- [x] **rtk opt-in 통합 v6.8** — 플러그인 전용 rtk-wrap, AskUserQuestion UI 모드 선택, `/rtk` 토글 스킬, PostToolUse/test-runner/git-* 자동 라우팅 (다른 프로젝트에 무영향)
 
 **예정**
 - [ ] **구조 테스트** — 의존성 규칙을 실제 테스트 코드로 강제

@@ -24,3 +24,4 @@ description: Push the branch and create a PR with a compact generated summary
 - Never push to `main` directly
 - Include test evidence
 - Link related issues when available
+- Route `git` and `gh` calls through `bash hooks/rtk-wrap.sh <cmd> ...` (see `CLAUDE.md → RTK Wrapping`)
