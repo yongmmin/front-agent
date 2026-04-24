@@ -16,4 +16,3 @@ description: Create scoped Conventional Commits after reviewer PASS
 - Never use `git add .`
 - Never commit secrets
 - Never commit with failing tests
-- Route `git` inspection calls (`status`, `diff`, `log`) through `bash hooks/rtk-wrap.sh git ...` (see `CLAUDE.md → RTK Wrapping`)

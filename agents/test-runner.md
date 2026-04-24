@@ -15,8 +15,8 @@
 
 ## Workflow
 
-1. Detect the relevant test command (`npm test`, `vitest`, `jest`, `playwright test`, etc.)
-2. Run tests via `bash hooks/rtk-wrap.sh <cmd>` — never invoke the test binary directly. When the session mode opts in, rtk compresses output to failures only (up to -90%). When off, the wrapper passes through raw.
+1. Detect the relevant test command
+2. Run tests
 3. Summarize pass/fail counts
 4. On failure:
    - Create a GitHub issue
@@ -55,4 +55,3 @@ Rules:
 - Never hide or ignore failures
 - Never modify tests to force success
 - Do not stop on 3 consecutive failures without recording the pattern first
-- Route test binaries through `bash hooks/rtk-wrap.sh` (see `CLAUDE.md → RTK Wrapping`)

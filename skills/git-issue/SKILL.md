@@ -23,4 +23,3 @@ description: Create an issue for failed tests or tracked follow-up work
 
 - Always include reproduction steps for test failures
 - Return the issue identifier for later PR linking
-- Route `gh` calls through `bash hooks/rtk-wrap.sh gh ...` (see `CLAUDE.md → RTK Wrapping`)

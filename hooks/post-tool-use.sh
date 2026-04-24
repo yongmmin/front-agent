@@ -78,17 +78,13 @@ compact_block() {
   printf '%s\n' "$1" | sed '/^$/d' | sed '/^--$/d' | head -n "$2"
 }
 
-# Plugin-scoped rtk wrapper. Routes tsc/eslint through rtk when the session
-# mode opts in, else falls back to raw npx. Never affects other projects.
-RTK_WRAP="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/rtk-wrap.sh"
-
 TSC_PID=""
 ESLINT_PID=""
 
 if [ -f "$PROJECT_ROOT/tsconfig.json" ]; then
   (
     cd "$PROJECT_ROOT" && \
-    bash "$RTK_WRAP" npx tsc --noEmit --incremental --pretty false > "$TSC_OUT_FILE" 2>&1
+    npx tsc --noEmit --incremental --pretty false > "$TSC_OUT_FILE" 2>&1
     echo $? > "$TSC_RC_FILE"
   ) &
   TSC_PID=$!
@@ -97,7 +93,7 @@ fi
 if [ -f "$PROJECT_ROOT/.eslintrc.json" ] || [ -f "$PROJECT_ROOT/.eslintrc.js" ] || [ -f "$PROJECT_ROOT/eslint.config.js" ] || [ -f "$PROJECT_ROOT/eslint.config.mjs" ]; then
   (
     cd "$PROJECT_ROOT" && \
-    bash "$RTK_WRAP" npx eslint --format unix "$FILE_PATH" > "$ESLINT_OUT_FILE" 2>&1
+    npx eslint --format unix "$FILE_PATH" > "$ESLINT_OUT_FILE" 2>&1
     echo $? > "$ESLINT_RC_FILE"
   ) &
   ESLINT_PID=$!
