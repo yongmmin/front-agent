@@ -41,6 +41,16 @@ If the intent is `feature` and the request contains API keywords (`fetch`, `axio
 
 ---
 
+## RTK Wrapping (Plugin-Scoped Token Filter)
+
+- All plugin-internal Bash calls for `git`, `gh`, `tsc`, `eslint`, `jest`, `vitest`, `playwright`, `pytest`, `ls`, `tree`, `find`, `grep`, `rg`, `cat`, `diff` MUST go through `bash hooks/rtk-wrap.sh <cmd> [args...]`.
+- `rtk-wrap.sh` reads the session mode (`off | standard | aggressive | git-only`) from `FE_COPILOT_RTK` env var, then `.fe-copilot-cache/rtk-session.flag`, then defaults to `off`.
+- If rtk is not installed OR the mode disables the category, the wrapper transparently runs the raw command — no breakage.
+- Never run `rtk init -g` from the plugin. Never write to `~/.claude/settings.json` hooks for rtk. Other projects must remain untouched.
+- The user chooses the mode via the RTK Mode Gate (step 0 of Request Gate) or `/rtk` slash command.
+
+---
+
 ## Context Budget
 
 For each spawned agent, pass only:
