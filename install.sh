@@ -37,10 +37,6 @@ for skill in front-agent implement-figma match-style tdd code-review a11y-check 
   echo "  ✓ $skill"
 done
 
-# Short aliases for frequently-used skills.
-echo "Use the rtk-toggle skill. Arguments: \$ARGUMENTS" > "$CLAUDE_DIR/commands/rtk.md"
-echo "  ✓ /rtk alias → rtk-toggle"
-
 echo ""
 
 # 2. Apply .env* deny rules to ~/.claude/settings.json
