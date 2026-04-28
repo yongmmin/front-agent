@@ -66,6 +66,18 @@ Logic correctness — FAIL if any:
 - Async operation without error handling surfaced to UI
 - Edge cases not handled: empty list, zero value, boundary input
 
+Design quality — FAIL if any:
+- Duplicates an existing component/hook/util that the audit surfaced (or that obviously exists) instead of reusing it
+- Single component mixes 2+ responsibilities (data fetching + presentation + business logic) where extraction is trivial
+- New abstraction introduced with only one caller and no near-term second use ("premature abstraction")
+- Props drilling 3+ levels where context, composition, or colocation is the standard fix
+- Magic values (numbers, strings, role names) inlined where a named constant or enum is the project pattern
+- Logic that belongs in a pure function is embedded inside a component body, blocking testability
+
+Design quality — PASS notes (do not fail):
+- Three similar lines is acceptable; do not demand abstraction for hypothetical reuse
+- Style-only or naming preferences are not failures
+
 ---
 
 ## #failure-patterns

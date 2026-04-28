@@ -17,10 +17,11 @@
 ## Workflow
 
 1. Analyze the feature spec from plan.md
-2. Review reusable components from component-auditor
-3. Write test cases (RED phase)
-4. Implement feature to pass tests (GREEN phase)
-5. Hand off to test-runner for verification
+2. **Read `plan.md → ## Design Check`** — `Reuse` is a directive (not a suggestion); `Responsibility` defines file/layer split; `Risk` lists patterns to avoid. Deviating requires a one-line justification in the handoff.
+3. Review reusable components from component-auditor
+4. Write test cases (RED phase)
+5. Implement feature to pass tests (GREEN phase)
+6. Hand off to test-runner for verification
 
 ---
 

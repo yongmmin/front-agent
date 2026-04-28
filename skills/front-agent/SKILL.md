@@ -126,6 +126,11 @@ Use this format:
 ## Affected Files
 - path/to/file.tsx - [change]
 
+## Design Check
+- Reuse: [component/hook/util to reuse, or "none — new primitive justified because X"]
+- Responsibility: [how logic splits across files — e.g. "fetch in hook, render in component, format in util"]
+- Risk: [conflict with an existing pattern or convention, or "none"]
+
 ## Execution Steps
 - Step 1: [agent] - [task]
 - Step 2: [agent] - [task]
@@ -136,6 +141,17 @@ Use this format:
 ## Commit Units
 - [type]: [description]
 ```
+
+**Design Check rules**:
+- Required for `ui`, `figma`, `feature`, `refactor`. Omit for `review`.
+- Max 1 line per bullet. No prose paragraphs.
+- If `Reuse` says "new primitive", the justification must be one concrete reason — not a vague "for flexibility".
+- Authoring order:
+  1. At plan creation, fill `Reuse / Responsibility / Risk` from a quick scan + project knowledge.
+  2. After `component-auditor` runs, **update the `Reuse` line in place** with the concrete candidates it surfaced. This is a small in-place edit, not a new section.
+  3. `developer` / `ui-builder` / `api-integrator` read the updated `plan.md` as their canonical Design Check.
+- Do not duplicate the audit list. The Reuse line is the single source of truth.
+- This section exists to catch design mistakes BEFORE implementation. It is read by the user during plan approval and re-read by `reviewer` during the design category check.
 
 Ask: `Please review plan.md. Approve it and I will execute.`
 
@@ -181,7 +197,10 @@ Rules:
 ### Shared Skip Rules
 
 - Skip `search-knowledge` if stored knowledge is empty or irrelevant. Run `bash hooks/knowledge-has-content.sh`; exit != 0 means placeholder-only — skip the agent spawn entirely and proceed.
-- Skip `component-auditor` for review-only tasks and pure API wiring with no UI change
+- `component-auditor` is **MANDATORY** for any intent that creates or modifies UI: `ui`, `figma`, and any `feature` whose `Affected Files` include `.tsx`/`.jsx` components, hooks, or styles. Skipping in these cases is a workflow violation.
+- Skip `component-auditor` only when ALL of the following hold:
+  - intent is `review` (review fast-path), OR
+  - intent is `feature` AND the change touches zero component/hook/style files (pure service/util/API wiring)
 - Skip `api-integrator` unless UI data fetching or mutation behavior changes
 - Skip `save-knowledge` if the task produced no durable learning
 

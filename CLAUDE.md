@@ -93,7 +93,7 @@ Rules:
 ### Skip Rules
 
 - Skip `search-knowledge` if stored knowledge is empty or clearly irrelevant
-- Skip `component-auditor` for review-only tasks and pure API wiring with no UI changes
+- `component-auditor` is MANDATORY whenever the change creates or modifies a component/hook/style. Skip ONLY for `review` intent or `feature` work that touches zero UI files (pure service/util/API)
 - Skip `api-integrator` unless UI data fetching or mutation behavior changes
 - Skip `save-knowledge` if no durable pattern, decision, or issue was learned
 
