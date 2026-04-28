@@ -48,7 +48,24 @@ extract_section() {
   ' "$CONSTRAINTS"
 }
 
+# Capture full output once so we can measure size before printing.
+OUTPUT=""
 for tag in $SECTIONS; do
-  extract_section "$tag"
-  echo ""
+  SECTION_OUT=$(extract_section "$tag")
+  OUTPUT="${OUTPUT}${SECTION_OUT}"$'\n\n'
 done
+
+printf '%s' "$OUTPUT"
+
+# Token budget instrumentation. 8KB ≈ 2K tokens at ~4 chars/token.
+# Emits to stderr only — never pollutes the stdout consumed by the agent.
+BUDGET_WARN_BYTES="${FE_COPILOT_BUDGET_WARN_BYTES:-8192}"
+BYTES=$(printf '%s' "$OUTPUT" | wc -c | tr -d ' ')
+APPROX_TOKENS=$((BYTES / 4))
+if [ "$BYTES" -gt "$BUDGET_WARN_BYTES" ]; then
+  printf '[token-budget][warn] extract-constraints %s: %s bytes (~%s tokens) exceeds %s\n' \
+    "$AGENT" "$BYTES" "$APPROX_TOKENS" "$BUDGET_WARN_BYTES" >&2
+else
+  printf '[token-budget] extract-constraints %s: %s bytes (~%s tokens)\n' \
+    "$AGENT" "$BYTES" "$APPROX_TOKENS" >&2
+fi

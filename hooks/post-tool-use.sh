@@ -137,6 +137,19 @@ fi
 rm -f "$TSC_OUT_FILE" "$ESLINT_OUT_FILE" "$TSC_RC_FILE" "$ESLINT_RC_FILE" 2>/dev/null
 
 if [ -n "$ERRORS" ]; then
+  # Token budget instrumentation — stderr only. Helps surface oversized
+  # validation feedback that would inflate the next turn's context.
+  BUDGET_WARN_BYTES="${FE_COPILOT_BUDGET_WARN_BYTES:-8192}"
+  ERR_BYTES=$(printf '%b' "$ERRORS" | wc -c | tr -d ' ')
+  ERR_TOKENS=$((ERR_BYTES / 4))
+  if [ "$ERR_BYTES" -gt "$BUDGET_WARN_BYTES" ]; then
+    printf '[token-budget][warn] post-tool-use errors: %s bytes (~%s tokens) exceeds %s\n' \
+      "$ERR_BYTES" "$ERR_TOKENS" "$BUDGET_WARN_BYTES" >&2
+  else
+    printf '[token-budget] post-tool-use errors: %s bytes (~%s tokens)\n' \
+      "$ERR_BYTES" "$ERR_TOKENS" >&2
+  fi
+
   echo "PostToolUse validation failed: $FILE_PATH"
   echo -e "$ERRORS"
   echo ""

@@ -81,6 +81,17 @@ Rules:
 - No prose paragraphs
 - Prefer identifiers and paths over explanation
 
+### Budget Measurement
+
+`hooks/extract-constraints.sh` and `hooks/post-tool-use.sh` log byte size and approximate token count to **stderr** on every invocation. The warning threshold is 8192 bytes (~2K tokens) and is overridable via `FE_COPILOT_BUDGET_WARN_BYTES`. Stderr lines never reach the agent context — they exist for observability and offline tuning.
+
+```
+[token-budget] extract-constraints reviewer: 3158 bytes (~789 tokens)
+[token-budget][warn] extract-constraints reviewer: 9421 bytes (~2355 tokens) exceeds 8192
+```
+
+If a `[warn]` line appears, prune the relevant `constraints.md` section or splice it into a tighter tag rather than letting the agent context inflate.
+
 ---
 
 ## On-Demand Loading
