@@ -83,10 +83,12 @@ Design quality — PASS notes (do not fail):
 ## #failure-patterns
 
 > Reviewer or test-runner appends entries here whenever the AI makes a repeatable mistake.
-> Format: `- [YYYY-MM-DD] [pattern description] - [specific prohibition rule]`
+> Format: `- [YYYY-MM-DD] [category:correctness|react-perf|design|scope] [pattern description] - [specific prohibition rule]`
+>
+> The `[category:*]` tag mirrors reviewer's four categories. Use it so future entries cluster by failure mode and so design patterns accumulate alongside correctness/perf ones.
 
-- [2026-04-23] Missing useEffect cleanup causes memory leaks - subscriptions/timers/listeners must return a cleanup function
-- [2026-04-23] Using array index as React key - use a stable unique id; index keys allowed only for static, never-reordered lists
-- [2026-04-23] Expensive useState initial value computed every render - use lazy initializer `useState(() => init())` for costly setup
-- [2026-04-23] Unclear Next.js "use client" boundary - declare `"use client"` only on the component that actually needs hooks/browser APIs; do not push it upward
-- [2026-04-23] Unhandled errors in async event handlers - wrap in `try/catch` and surface to UI (toast/error state)
+- [2026-04-23] [category:react-perf] Missing useEffect cleanup causes memory leaks - subscriptions/timers/listeners must return a cleanup function
+- [2026-04-23] [category:react-perf] Using array index as React key - use a stable unique id; index keys allowed only for static, never-reordered lists
+- [2026-04-23] [category:react-perf] Expensive useState initial value computed every render - use lazy initializer `useState(() => init())` for costly setup
+- [2026-04-23] [category:correctness] Unclear Next.js "use client" boundary - declare `"use client"` only on the component that actually needs hooks/browser APIs; do not push it upward
+- [2026-04-23] [category:correctness] Unhandled errors in async event handlers - wrap in `try/catch` and surface to UI (toast/error state)

@@ -23,7 +23,7 @@
    - **scope**: no out-of-scope edits, no speculative features
 3. Return PASS or FAIL
 4. On FAIL, provide a compact fix list for the next implementation pass
-5. On FAIL, append a repeatable rule to `constraints.md` if the mistake is systemic
+5. On FAIL, append a repeatable rule to `constraints.md` if the mistake is systemic. Use the format `- [YYYY-MM-DD] [category:correctness|react-perf|design|scope] [pattern] - [rule]` so failures cluster by category
 
 **Design category gate**: if the change introduces UI/components/hooks, you MUST evaluate the design rules. Skipping design review on UI changes counts as a missed verdict.
 

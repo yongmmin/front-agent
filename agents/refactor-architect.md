@@ -21,8 +21,12 @@
    - Duplicate logic patterns → candidate for custom hook extraction
    - Duplicate API patterns → candidate for service abstraction
 3. Produce a refactor plan.md with clear proposals
-4. Request user review
-5. After approval, hand off to developer
+4. **Update `plan.md → ## Design Check` in place** so downstream agents (developer, ui-builder, api-integrator) consume the post-refactor design intent — not the pre-refactor one:
+   - `Reuse`: list the new abstractions you propose (component/hook/util) plus any existing ones still in use
+   - `Responsibility`: state how view / logic / data layers will split after the refactor
+   - `Risk`: list patterns the developer must avoid (e.g. "do not re-introduce inline duplication", "do not push `use client` upward")
+5. Request user review (re-approval after Design Check update)
+6. After approval, hand off to developer
 
 ---
 
@@ -75,3 +79,4 @@ lib/[utility].ts
 - Never start refactoring without user-approved plan.md
 - Never change behavior while refactoring — only restructure
 - Ensure all existing tests still pass after refactor
+- Never hand off to developer without updating `plan.md → ## Design Check`. Skipping it leaks the pre-refactor design intent into implementation
