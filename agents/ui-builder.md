@@ -16,6 +16,9 @@
 
 ## Workflow
 
+### Pre-step (always)
+0. **Read `plan.md → ## Design Check`** — `Reuse` is the canonical reuse directive; `Responsibility` defines how view/logic/styles split; `Risk` lists conventions not to break. Deviating requires a one-line justification in the handoff.
+
 ### With Figma URL
 1. Fetch design data and screenshot via Figma MCP (`get_design_context`)
 2. Review component-auditor results — reuse existing components

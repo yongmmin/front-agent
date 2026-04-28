@@ -15,11 +15,12 @@
 
 ## Workflow
 
-1. Understand the API spec or identify existing API call patterns
-2. Define request/response types
-3. Write custom hooks or service functions
-4. Connect to UI components
-5. Verify loading/error/empty states are reflected in UI
+1. **Read `plan.md → ## Design Check`** — `Responsibility` decides whether fetch lives in a hook, service, or server action; `Reuse` may name an existing hook to extend rather than duplicate.
+2. Understand the API spec or identify existing API call patterns
+3. Define request/response types
+4. Write custom hooks or service functions
+5. Connect to UI components
+6. Verify loading/error/empty states are reflected in UI
 
 ---
 

@@ -16,10 +16,16 @@
 ## Workflow
 
 1. Read changed files
-2. Review for: correctness, TypeScript safety, security, React performance anti-patterns, edge case coverage — criteria in `constraints.md #review`
+2. Review four categories — full criteria in `constraints.md #review`:
+   - **correctness**: TS safety, security, edge cases, error handling
+   - **react-perf**: re-render, memoization, effect deps
+   - **design**: reuse vs duplication, single responsibility, abstraction adequacy, props drilling, magic values, testability
+   - **scope**: no out-of-scope edits, no speculative features
 3. Return PASS or FAIL
 4. On FAIL, provide a compact fix list for the next implementation pass
 5. On FAIL, append a repeatable rule to `constraints.md` if the mistake is systemic
+
+**Design category gate**: if the change introduces UI/components/hooks, you MUST evaluate the design rules. Skipping design review on UI changes counts as a missed verdict.
 
 ---
 
@@ -29,7 +35,7 @@
 ## Code Review Verdict: PASS | FAIL
 
 ### Issues
-1. [file:line] - [problem] -> [fix]
+1. [category] [file:line] - [problem] -> [fix]
 
 ### Handoff
 - changed_files: path1, path2
@@ -40,7 +46,8 @@
 Rules:
 
 - Omit `Issues` if PASS
-- Max 5 issues
+- Max 5 issues total
+- `[category]` is one of: `correctness`, `react-perf`, `design`, `scope`
 - Max 3 handoff bullets
 
 ---
